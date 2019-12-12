@@ -1,0 +1,24 @@
+#!/bin/bash
+###hh
+# 此脚本用于关掉已知命令名的应用
+
+# 系统自带命令:killall 也可以根据进程名字杀死进程, 记住千万不能用-g选项
+
+if [ "$1" != "" ];then  # or [ $1 ], [ ! $1 ]是$1为空时结果为真
+    # 关掉参数中给出的程序名, 之前没有 grep -v这一部分, 导致可能先把这个脚本程序给关闭了,从而该关的程序没关到
+    # grep -v后面的grep可以不写
+    pids=$(ps aux | grep -i $1 | grep -v '/usr/bin/killp \| grep ' | awk '{print $2}') 
+    # ps aux | grep -i $1 | grep -v '/usr/bin/killp \| grep ' 
+else
+    exit 0
+fi
+
+for pid in ${pids[@]}
+do
+    kill $pid
+    if [ $? -eq 0 ];then
+        echo "$pid is killed"
+    else
+        echo "kill $pid failed"
+    fi
+done

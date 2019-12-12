@@ -1,0 +1,60 @@
+#01 格式控制符使用
+格式	描述
+%%	百分号标记
+%c	字符及其ASCII码
+%s	字符串,调用str()
+%r  字符串,调用repr()
+%d	有符号整数(十进制)
+%u	无符号整数(十进制)
+%o	无符号整数(八进制)
+%x	无符号整数(十六进制)
+%X	无符号整数(十六进制大写字符)
+%e	浮点数字(科学计数法)
+%E	浮点数字(科学计数法，用E代替e)
+%f	浮点数字(用小数点符号)
+%g	浮点数字(根据值的大小采用%e或%f)
+%G	浮点数字(类似于%g)
+%p	指针(用十六进制打印值的内存地址)
+%n	存储输出字符的数量放进参数列表的下一个变量中
+
+%.mf  指定小数点位数为m位
+%-md  指定输出宽度为m位,左对齐
+%0md  指定输出宽度为m位,左侧用0填充
+
+#02 math库常用数学函数
+math.pi          数学常数π= 3.141592
+math.e           数学常数e = 2.718281
+math.tau         数学常数τ= 6.283185
+math.ceil(x)     返回x的上整,如ceil(3.14)返回4,ceil(-3.14)返回-3
+math.fabs(x)		 返回绝对值x
+math.factorial(x)    返回x!,如果x不是非负整数,就会产生ValueError
+math.floor(x)    返回x的下整,如floor(3.14)返回3,floor(-3.14)返回-4
+math.ceil(x)     返回x的上整,如ceil(3.14)返回4,ceil(-3.14)返回-3
+math.exp(x)      返回e的x次方,即返回e**x
+math.pow(x,y)    返回x的y次方,即返回x**y
+math.sqrt(x)     返回√x
+math.degrees(x)  把角x从弧度转换成角度
+math.radians(x)  把角x从度转换成弧度
+math.acos(x)     返回x的反余弦
+math.asin(x) 	 返回x的反正弦
+math.atan(x) 	 返回x的反正切
+math.cos(x)      返回x的余弦
+math.sin(x)      返回x的正弦
+math.tan(x)      返回x的正切
+math.log(x,a)    返回,若不写a,则底为e
+
+#03 字符串数字转换函数
+int(x [,base ])         将x转换为一个整数    
+long(x [,base ])        将x转换为一个长整数    
+float(x )               将x转换到一个浮点数    
+complex(real [,imag ])  创建一个复数    
+str(x )                 将对象 x 转换为字符串    
+repr(x )                将对象 x 转换为表达式字符串    
+eval(str )              用来计算在字符串中的有效Python表达式,并返回一个对象 tuple(s )               将序列 s 转换为一个元组    
+list(s )                将序列 s 转换为一个列表    
+chr(x )                 将一个整数转换为一个字符    
+unichr(x )              将一个整数转换为Unicode字符    
+ord(x )                 将一个字符转换为它的整数值    
+hex(x )                 将一个整数转换为一个十六进制字符串    
+oct(x )                 将一个整数转换为一个八进制字符串   
+

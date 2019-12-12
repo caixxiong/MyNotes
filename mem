@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$1" ];then
+    num=$1
+else
+    num=5
+fi
+
+ps aux | sort -rnk 4 | awk '{print($1, $2, $3, $4, $11)}' | head -n $num

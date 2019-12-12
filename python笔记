@@ -1,0 +1,1208 @@
+#01 注意空格和tab键是不能混用的,否则会出现ident error(代码缩进错误)
+
+#02 要导入自定义的模块(包),必须让解释器能够找到该自定义模块(包),这有几种方式:
+#   01 将待导入模块(包)文件(夹)和本模块文件在同一目录中
+#   02 设置环境变量PYTHONPATH,使得其中含该模块(包)的父目录
+#   03 在pth文件中添加该模块(包)的父目录
+#   04 将该模块安装到python环境中(类似于pip安装第三方库),只是此处是用pip 源码安装方式.
+#   05 用sys.path.append("该模块(包)的父目录")方式,参数不能用'~','.'等符号,但可以用相对路径
+#
+#   ps:python解释器查找模块时,先是在当前包中查找,然后在内置的built-in模块中查找,
+#   然后是在sys.path给定的路径中查找,sys.path的初始值源于三个地方:当前路径,PYTHO
+#   NPATH环境变量(可能需要手动添加),默认安装路径.可以在python代码中打印sy.path的
+#   值,如:import sys print sys.path,由于sys.path是一个列表,所以可以在主文件首写
+#   import sys sys.path.append('待导入模块文件的父目录'),然后就可以使用导入的模
+#   块了
+
+#03 import使用语法,有两种使用方式:import 包A.子包A or import 包A.子包A.模块A
+#	or import 包A.模块A,此种方式只能导入包,子包,模块,而不能导入模块里的变量,
+#	函数和类,并且此方式使用时必须用全路径名; 第二种方式是,from 包A.子包A impo
+#	rt 模块A,此法可以导入变量,函数和类,但是不能导入子包,因为语法是from A.B.C import x
+#	其中x必须是模块,变量,类或者函数,x中不有'.',此方式在使用时不需要全路径名,导入函数时
+#	只写函数名而不加括弧,但是使用函数时要加括弧
+#
+#	**纠错:from方式是可以导入子包,比如上面的包结构A.B.C.x,可以导入from A.B import C,这样就把子包C
+#	    导入进来了,只是from A.B impot C.x是不行的
+#   
+#   ps: 无论是用from还是直接用import,都可以使用as给导入的对象重命名
+#   ps: python中的包,其实就是一个文件夹,但是此目录下必须有__init__.py文件(可以是
+#   空文件),也就是说含有__init__.py文件的文件夹都可作为python的包
+
+#04 python2中默认编码是ASCII码,python3中默认编码是UTF-8,所以如果是python2中有
+#   中文,则会出现编码错误(即使是在注释中),而python3中则可以出现中文字符,并且可
+#   以有中文变量名.
+#   
+#   对于py文件来说,在开头第一行或者第二行用 #coding:utf-8 就是告诉解释器使用
+#   utf-8编码解释,这样即使是python2解释器,也能识别中文了(pyhton文件的第一行和第二行用于指定python执行程序和编码格式)
+#   官方文档解释:More precisely, the first or second line must match the regular expression "coding[:=]\s*([-\w.]+)".
+#   
+#   对于vim来说,一般是指定内部编码为utf-8(set encoding=utf-8),然后打开文件时,
+#   vim会从编码列表中找到最好的编码方式来读取文件
+
+#05 python代码中,某一行可以是一个单独的常量,如123, 12.5, "hello"等,并且python
+#   中的三引号用于定义跨行字符串,所以三引号可以作为多行注释而存在,实际上python
+#   中并没有专门的多行注释符
+
+#06 python中一般一行是一个语句,也就是说换行符是语句分隔符.但是也可以使用反斜
+#   杠(backslash\)作为续行符,将多行文本作为一个语句,注意三种括弧以及三引号是
+#   可以作为隐式的续行符的,并且PEP8推荐使用隐式的续行符.另外可以用分号(semicolon;)
+#   分隔,使得一行可以有多个语句
+
+#07 python中的语句块是用缩进和冒号(colon:)来标记的,冒号作为代码块的起始标记
+#   接下来的代码块需要使用一致的缩进,C C++ Java等用{}表示代码块
+
+#08 input("提示信息")函数将输入转换为一个str对象,如果要输入数字需要用int()等
+#   函数进行转换.
+#   print(v1, v2, v3,sep=' ', end='\n')函数可以指定sep和end为值分隔符和结束符
+
+#09 python变量总结:
+#   01 python中的所有变量名其实都是引用(指针),并且变量没有类型,而变量名指向的内
+#   存单元中的内容则称为对象,对象是有类型的.
+#   
+#   02 python中有两种类型的对象:不可变对象(int,float,complex,bool,tuple,str),
+#   其余的数据类型(list,dict,set等)是可变对象.不可变对象是指该对象内存空间中的
+#   内容不可以被修改,而可变对象则是值其内存空间中的内容可以被修改.
+#   ps: python变量名是一种通用指针,无论它指向的对象可变对象还是不可变对象,只要
+#   重新给它赋值,它就会指向一块新的内存单元.对于指向不可变对象的变量,只能通
+#   过重新指定新的内存单元的方式(赋值)来改变变量的值,对于指向可变对象的变量,则可以
+#   修改对象的值,而不改变内存单元地址,也就是不需要重新分配内存空间
+#   
+#   03 python中给变量赋值并不是修改原来内存单元中的值,而是让该变量指向一块新的
+#   内存单元,也就是说赋值后变量的地址(使用id(vname)函数查看)也改了,这与c++中的
+#   普通变量不同,实际上它是与C++中的指针是一种机制,只是C++中的指针有类型限定,而
+#   python中的指针是通用类型的.所以在函数参数传递的时候,传递的参数其实都是地址,
+#   对于可变对象参数来说,可以通过该形参变量来修改原来实参对象,而对于不可变对象参
+#   数来说,是无法修改原来的参数值的,这是因为即使不是参数传递也无法修改一个不可变对
+#   象的值,所以函数传递一个不可变对象时,唯一的目的就是要使用它的值.
+#
+#   04 变量的作用域: 在python中可以改变作用域的代码段是def/class/lambda/列表解析式/yield生成式
+#   而if/elif/esle, try/except/finally, with, for/while代码块是不改变变量作用域的,这和C++中不一
+#   样,在C++中用{}括起来的代码块就会构成一个新的作用域
+#   ps: 在python中可以嵌套定义函数和类,此时外层的标识符,在里层是可以使用的.
+#
+#   05 全局变量在函数中如果只使用值,不作改变,则可以不需要global声明改变量,但是如果
+#   需要修改全局变量,则需要先用gloabal对其进行声明,告诉解释器这个变量是一个全局变量
+#   另外,如果没有用gloabal声明,并且又重新定义了一个同名变量,则该全局变量被屏蔽,而如果
+#   使用了gloabal声明,则在函数内修改变量后,在函数外该变量的值也发生改变.这一点类似于
+#   C++中指针的指针类型,即global关键字起到的作用是指针的指针
+#   
+#   06 可以使用globals()函数获取所有全局变量的字典,字典元素中的key是变量的名字(字符串类型)
+#   value是该全局变量的值. 如 gs = globals(), gs["var_name"] = 100,则全局变量的值在函数外
+#   也会变成100了   
+#   ps: golbals()会把所有用import导入的全局标识符也加入字典,如: import numpy ,则numpy在这个
+#   字典里, from numpy import * ,则numpy下所有标识符都加入这个字典里 
+#   ps: 如果一个对象没有指针指向了,则这段内存空间会立刻被python垃圾回收机制回收
+#
+#   07 python中没有定义常量的机制,一般是约定字母全部大写为常量
+
+#10 数据类型:数值型(int,float,complex)
+#            bool型(True,False)
+#            序列型(str,list,tuple),元素可根据位置索引访问
+#            字典(dict)
+#            集合(set)
+#            自定义类型(class)
+#            None
+#   ps: 数值型,str,tuple,bool是不可变对象类型,其余是可变对象类型
+#   ps: int,float,complex,bool,str,list,tuple,dict,set这些虽然放在了builtin函数列表里,但其实
+#       它们并不是函数,而是一些类,只是它们的构造函数需要参数,使得它们看起来像函数.
+#       此外还有range,object,proporety,type,bytes,bytearray也是一个类
+#   ps: 一个类对象判定为False,当且仅当它实现了__bool__函数返回False或者是__len__函数返回0,如果
+#       既没有__bool__()也没有__len__(),则该类的所有实例永远是True
+#   ps: 所有对象都可以比较是否相等,是否为True,以及转换为字符串以及有__class__属性.判断两个对象相
+#   等,除非定义了__eq__()方法,并且返回True;使用print(o)时,解释器会隐式调用str(o)
+#
+#
+#   01 整数类型:整数类型可以是无限精度的,任意长的整数都是int
+#               以0x 0X打头表示16进制,以0o 0O打头表示8进制,以0b,0B打头的表示2进制
+#   02 浮点类型:345600=3.456e5=3.456E5,浮点数有精度限制,实际上就是C++中的double类型
+#   03 complex类型:由两个浮点数构成实部和虚部,如1+2.2j,3.11e-5+4j
+#   04 算术运算符:  # 对于复数也成立
+#      + - * / %    # python3中的/是浮点除法,python2中是整数除法(地板取整)
+#      ** //        # a**b=a^b, a//b=[a/b]是地板取整除法
+#      + - ~        # 正号,负号,按位取非~x=-(x+1) 此三者优先级大于乘除,小于乘方
+#   05 位操作符: 
+#       | ^ &  << >> # 按位或 异或 与 左移 右移,四者的优先级不同,由小到大,且小于加减,大于比较运算符
+#       移位运算符不改变变量本身的值,按位取非也不改变变量的值
+              
+#11 str类型: 用'' "" '''''' """"""包裹起来的字符序列,三引号可以用与跨行文本
+#   01 字符串操作: + * [] [:] in not in % 
+#                  format(v1, v2) str(v1) capitalize() upper() lower() title() 
+#                  find(ss) count(ss) isalpha() isdigit() islower() isupper()
+#   02 join()方法: 参数是一个字符串类型的迭代器,是实例方法. 如, "HH".join(["1","2"])= '1HH2'
+   
+#11-1 bytes类型: 字符串常量前面加b,B作为前缀时,结果不是字符串,而是一个bytes对象
+#   01 构造器:
+#       bytes(iterable_of_ints) -> bytes
+#       bytes(string, encoding[, errors]) -> bytes
+#       bytes(bytes_or_buffer) -> immutable copy of bytes_or_buffer
+#       bytes(int) -> bytes object of size given by the parameter initialized with null bytes
+#       bytes() -> empty bytes object
+#       
+#       ps: bytes的元素是字节,其值必须在0-256之间,所以用字符串构造时,必须都是ascii字符
+#           打印bytes对象时,如果是可显示字符则显示,如果不是则用\xXX显示
+#       
+#       ps: str和bytes常量都用引号括住,引号内可以使用\xXX表示一个16进制编码,\ooo表示一个8进制编码
+#           \xXX形式中XX必须是两个16进制数字(不能少于2个, 可以更多, 此时多的部分算下一个字符),第一
+#               个x必须小写,如\x7g是错误的,如b'\x4123'=b'A23'
+#           \ooo形式中o是一个8进制数字,且o的数目可以是0 1 2 3,如果是0个,则\就是反斜杠本身,如果是1-3
+#               个,则是表示一个8进制数,如果三个时的ooo超出了一个字节,则进行截断, 此外\ooo形式中, 第
+#               一个>=8的数字表示这个8进制数结束了, 如'\738'的长度是2
+#           ps: \后面跟的字母不能构成转义符时,\就是反斜杠本身,如果和后面的字符构成转义符但是又不想
+#               让\转义,则用\\,如: "\g"="\g",因为g不转义,"\\n"="\n",是"\"和"n"
+#           ps: 在ipython中,可以根据字体粗细来判断\xXX和\ooo形式的字符
+#           ps: str和bytes常量中对于可显示字符,则就是写字符本身即可,而对于非显示字符,则可以使用\xXX和
+#               \ooo的形式来表示以及\n,\r等表示换行和回车符,总之\后面是要转义的,除非没有转义的字符配合
+#       
+#       ps: 一般来说引号括住的字符串里边可以有\作为转义作用, 然后在引号前边加b(B),u(U)等则表示将该字符串当成
+#           unicode字符串还是bytes类型的数据, 如: list(b'\x40a2')=[64, 97, 50], list(U'\40a2') = ['@', 'a', '2']
+#           这里需要注意的一点是, 在b开头的字符串里, '2'是转成它的ascii码的, 所以值是50, 而不是4, 还有一种字符串
+#           以r(R)开头, 表示引号里边的转义字符'\'失效, 即不进行任何转义的原始字符串, 如
+#           list(r'\x40a2') =['\\', 'x', '4', '0', 'a', '2'], 用r表示的字符串常用于正则表达式(re模块)中
+#       
+#       ps: '\'除了可以表达16和8进制数外, 它也可以做其他转义的, 如
+#           list(r'\n\t\r')=['\\', 'n', '\\', 't', '\\', 'r']
+#           list(b'\n\t\r')=[10, 9, 13]
+#           list(u'\n\t\r')=['\n', '\t', '\r']
+#           list(u'\a\b\c')=['\x07', '\x08', '\\', 'c']     # 因为\a和\b可以构成转义, \c不可以
+#       
+#       ps: 在python3中'aaa'=u'aaa', 在python2中两者是不相同的
+#       
+#       ps: r打头的原生字符串(raw str)中存在一个bug, 就是它和没有以r打头的字符串一样, 不能以奇数个\结尾, 否则会报
+#           引号不匹配的语法错误(因为最后的引号被转义了), 这是不正常的, 因为既然r中的\不转义, 那它在最后也应该不
+#           转义的. r'nihao\' 和 'nihao\'都报错
+#       ps: python字符串可以写成 ss = "hello" "world" = "hello world", 即空白字符隔开的str之间会自动拼接, 
+#           "aa"   "bb""cc"="aabbcc" 
+#
+
+
+#12 list类型:
+#   01 列表操作: + * [] [:] in not in
+#                insert(idx, val) append(val) remove(val) pop(idx) reverse() 
+#                sort(reverse=T:rue) clear()
+#   ps: 元组的操作和list一样,但是没有用于修改元素的函数
+#   ps: 元组的定义其实不是由()定义的,而是','定义的,除了空元组要有(),其余均不需要
+#       在函数参数传递时元组必须有(): 空元组(),一个元素的元组(x,)
+#   ps: 多维列表索引时只能是L[i][j],不能是L[i,j],但是numpy中A[i,j]=A[i][j]
+#   ps: list和numpy等进行切片时, 是可以越界的, 此时会自动发生截断而不会抛出out index异常, 但是索引越界则会抛出异常
+#
+#13 dict类型: 
+#   01 字典中的key只能是不可变对象类型(num,str,tuple)
+#   02 字典操作 items() keys() values() update(dict2) pop(k) clear()
+#   03 字典构造器:
+#       dict() -> new empty dictionary
+#       dict(mapping) -> new dictionary initialized from a mapping object's(key, value) pairs
+#       dict(iterable) -> new dictionary initialized as if via:
+#           d = {}
+#           for k, v in iterable:   # iterable可以是一个二维N*2的列表
+#               d[k] = v
+#       dict(**kwargs) -> new dictionary initialized with the name=value pairs in the keyword argument list. 
+#           For example:  dict(one=1, two=2)
+
+#   ps: key可以是bool类型,只是此时key=True与key=1一样,key=False与kye=0一样
+#   此时,如果是先有d[True]=10,则给d[1]赋值20时,则变成{True:20},相反,如果是
+#   先有d[1]=10,再给d[True]=20时,则变成{1:20}
+#   ps: 生成显示字典和显示列表时,可以用**d,*l来直接将其他字典或者列表的元素加进来
+#       如: D={"hello":100, **d}, L=[1,2,3,*l],其中d和l是已定义的字典和列表
+#   ps: 字典有一个get(k,d=None)方法,其作用是如果k in D,则返回D[k],否则返回d
+
+#14 set类型:
+#   01 集合中的元素必须是不可变immutable对象(num,str,tuple)
+#   02 集合操作 in not in | & - ^ 等价于 union(s2) intersection(s2) difference(s2) symmetric_difference(s2)
+#               add(val) update(s2) copy() discard(val) remove(val)
+#   ps: 集合元素可以是boo类型,此时True=1, False=0,也就是说如果集合中有了1,则添加True
+#   集合元素不变,反之亦然,这类似于字典中的bool类型
+#   ps: immutable对象和hashable对象是一样的
+
+#15 python比较,逻辑运算符,表达式:
+#   01 比较运算符: < <= > >= == != is [not] [not] in 返回True or Fasle
+#       (1) 以上所有比较运算符的优先级相同,均低于位运算和算术运算符
+#       (2) 比较运算符可以任意连接,如 x < y <= z 等价于 x < y and y <= z,只是后者y可能要计算两次
+#       (3) == != 比较两个对象的值,而is和is not比较两个对象得到id(指针,引用),即比较是否指向同一个内存空间
+#
+#   02 逻辑运算符: and or not
+#       (1) and和or有短路操作,且优先级是or < and < not < 比较运算符
+#       (2) and or 两边可以接普通的表达式,其返回值也是普通的值,不一定是bool值
+#           如: "hello" and "world"="world", "hello" or "world"="hello", False or "hello"="hello", 10 or 2=10
+#               0 or False=False, False or 0=0 
+#           也就是说,and 和 or有短路操作,并且返回在可以确定整个表达式值时的子表达式(or and总是返回其中一个操作数),
+#           并且返回值也可以参与bool判断(if, while),此时由解释器自动转换成bool类型
+#       (3) not 表达式,返回True或者False,而不是和表达式相对应的值 not 0=True, not ""=True, not 20=False, not None=True
+#
+#   03 条件表达式: x if C else y 类似于C++中的C?x:y, 先计算C,C为True则计算并返回x,否则计算并返回y 
+#
+#   04 python解析式:有列表,集合,字典,生成(yield)四种解析式
+#       (1) 解析式的语法是: expression for x in o [for or if],即首先是一个表达式,然后至少一个for,然后是>=0个for
+#           和if的可混合表达式
+#       (2) 列表解析式:L=[解析式]
+#           集合解析式:S={解析式} 如果出现重复的值(==判断相等),则只留一个
+#           字典解析式:D={exp_k:exp_v for [for or if]} 如果同一个k出现多次,则留下最后一个v
+#           生成解析式:(解析式) 返回一个生成器对象,可以为函数参数传入,此时不需要().
+#       (3) 解析式中的多个for循环相当于嵌套for循环,但是if则是相当于过滤器,它的位置可以随意的,所以
+#           为了清晰起见,可以将之都集中放于最后,每次计算时必须执行完嵌套最里层的语句后才返回值的
+#       (4) 列表 集合 字典解析式一次性生成所有数据,数据量大时很占内存,生成解析式则是生成一个生成器,用next方法
+#           逐个生成数据
+#       (5) 如果用列表解析式生成一个列表只是为了传参或者是一次性使用,则用生成解析式代替更好
+#       
+#       ps: 除了在for循环后使用if语句外,也可以在表达式处使用条件表达式(x if C else y),需要注意的是,if语句(无else)
+#           必须在第一个for之后,而条件表达式(有else)只能在最左边的表达式处,不能放在for之后
+#       ps: 列表解析式可以将一个多维列表变成一个一维列表
+#        >>> matrix = [[1,2,3],[4,5,6],[7,8,9]] 
+#        >>> flat_list = [num for row in matrix for num in row]
+#        >>> flat_list  #out: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+           
+#16 python条件控制和循环:
+#   01 条件控制的三个关键字: if bool表达式: elif bool表达式 else:
+#   02 循环: while bool表达式: for x in seq:
+#      while和for循环后面可以跟else:语句块,在循环体执行完后,会执行else语句块,然后再退出整个循环
+#      但是如果在循环体中用break语句退出,则不会执行esle语句块的
+#   
+#   03 for循环的in关键字后面跟的对象不一定是seq类型(list,tuple,str),只要是可迭代对象即可(文件,字典,集合,自定义)
+#   04 for循环中的迭代对象如果是mutable的,则如果在循环体中修改该迭代对象,则会导致遍历出错,如,删除了一个元素,则
+#       此元素的下一个元素将无法遍历到,在当前元素前增加一个元素,则该元素会被遍历两次,所以出现这种情形时,必须用
+#       切片的方式去遍历它的copy副本(o[:]),遍历的是副本,修改的是原对象
+
+#17 python函数:
+#   01 def fun_name(v1,v2,v3=10): suite
+#  
+#   02 函数形参分为两种:无默认值的和有默认值的,书写顺序必须是:所有无默认值参数,所有有默认值参数
+#      在函数调用时,必须提供至少无默认值参数个数个参数,否则报错,如果多于这个数目,则多的实参会
+#      按顺序赋值给有默认值的参数,这和C++是一样的.
+#      
+#      但是python中有一个特殊机制,就是函数调用时除了按顺序传参外,还可以根据关键字传参,具体的做法是
+#      如果函数定义时参数序列为(v1,v2,v3),则传参时可以调用fun(v3=99,v1=10,v2=20),这样可以改变参数书写顺序,
+#      需要注意的是,函数调用时如果混用位置参数和关键字参数,则关键字参数必须在所有位置参数之后,所以如果某个位置
+#      参数被用成关键字传参了,则其后的所有参数都只能用关键字传参了,此时关键字参数的传参顺序可以和定义时的参数
+#      顺序不同.
+#
+#   03 lambda函数 fun = lambda v1,v2,v3:expression
+#       fun = lambda x, y: exp <=> def fun(x, y): return exp    # 也就是说lambda中的表达式是作为函数返回值的
+#  
+#   04 lambda函数是匿名函数,但是也可以赋值给一个变量,此时这个变量就是一个函数了,此时可以和普通函数
+#      一样使用该匿名函数了,并且lambda函数也支持默认参数值和关键字参数调用.
+#      需要注意的是冒号后面只能跟一个表达式,而不能是一个python语句(if for等),所以一般lambda表达式
+#      用于作为函数参数传递,如map,reduce,filter函数等需要一个函数类型的参数.
+#   
+#   05 python函数可以使用*和**来批量传递位置和关键字参数,或者反过来将实参封装成列表和字典,详情见我的csdn博客
+#   
+#   06 如果函数的返回不是用return,而是用yield,则函数产生的是一个生成器对象.对于生成器类型的函数,要注意一下
+#      几点:(1) o = fun(),函数调用语句并不会执行函数体,只是返回一个生成器对象o (2)第一次调用next(o)时,函数体开始
+#      执行,并且执行到第一个yield语句,并把yield后面的值返回,第二次调用next(o)时,从第一次的yield语句的后一句开始
+#      执行,同样执行到第二个yield语句,并返回后面的值,如此重复下去,直到最后一个yield语句执行完,此时如果又一次
+#      调用next(o),则会接着执行最后一个yield语句后的语句,并且知道函数体的语句执行完了,然后发现没有yield语句,
+#      抛出一个异常StopIteration.(3) 即使yield后面的表达式是一个可迭代对象,或者迭代器,则也是将该迭代器当作单个值
+#      返回,这个迭代器并不会影响生成器函数的执行流程.(4) 由于上述的特殊执行过程,所以生成器函数中一般会使用循环
+#      来执行yield语句,而不是一个一个按顺序显示写出. 
+#
+#   07 函数参数详解:
+#      (1) 函数定义时的参数一共有四种:非默认参数,默认参数,*参数,**参数,其中非默认参数和默认参数也都是位置参数
+#      (2) *和**参数均最多只能有一个, 且**参数只能作为最后一个参数(如果有的话),*参数会吸收掉所有多余的位置实参
+#           同理**参数则会吸收掉所有多余的关键字参数,关键字参数直接用标识符,不能加引号
+#      (3) 在定义时:
+#           如果不考虑*参数,则参数列表只能是:(p1,p2,d1=0,d2=0,**k)
+#           考虑加上*参数,则有一下几种可能
+#           (*,p1,p2,d1=0,d2=0,**k),此时四个位置参数p1,p2,d1,d2必须都作为位置参数传入,当然d1,d2可以不传
+#           (p1,*l,p2,d1=0,d2=0,**k),此时p2,d1,d2必须用位置实参传递
+#           (p1,p2,*l,d1=0,d2=0,**k),此时d1,d2需用位置实参传递
+#           (p1,p2,d1=0,*l,d2=0,**k),此时d2需要用位置实参传递
+#           (p1,p2,d1=0,d2=0,*l,**k),此时位置参数按顺序给p1,p2,d1,d2,有剩余的则给l
+#           以上实例说明,*参数后的位置参数(默认和非默认)必须一关键字实参形式传递,实际上解释器也把它们定义为
+#           keyword-only参数了
+#
+#           实际使用中,很少会搞这么复杂,如果硬是要所有四种参数都有,则(p,*l,d=0,**k)和(p,d=0,*l,**k)这两种是最
+#           清晰的,并且这两种中第一种可能更好用,因为可以同时利用好*和默认参数的特性,第二种则不能同时有两种特性
+#      
+#      ps: 此外在一些函数的help文档中,经常发现函数参数列表的最后一个是/,这个/其实不代表任何参数,它只是表明/之前的
+#          参数都是位置参数,没有关键字参数,所以最后的/表示该函数所有参数都是位置参数,这种语法在python c中存在,即只有
+#          用c开发的函数才有此特性,python函数是不支持的,如果传参时给/之前的参数传递了位置参数,则会抛出TypeError异常
+#      ps: 定义函数时用**kargs,则**kargs也是吸收调用时所有剩下的关键字参数,优先是给所有的位置参数(默认和非默认)
+#          也就是说, 即使所有参数都作为关键字参数传递, 则**kwargs也只是包含出去其他所有参数之外的参数
+#      ps: 函数传递关键字实参时,关键字实参不能有引号(不能是字符串,不能是表达式),关键字参数必须是一个普通的标识符
+#      ps: 对于*参数,还有比较重要的知识点,上面已经知道,*l后面的所有参数,必须用关键字实参传递,其实只相当于是一个限定,可以
+#          认为*后面定义的参数全部是关键字参数,这个和/的规定比较类似,/是说它之前的参数必须是位置参数,另外如果是用一个单独
+#          的*,后面没有跟参数的名字,也是允许的,此时*不能接受任何位置参数,它只是用于表达其后的必须是关键字参数
+#          例子: 
+#          def fun(a, *, b): print(a,b)   #fun(10,b=2)正确, fun(10,20,b=1)抛出异常,因为只接受一个位置参数,但是传递了两个
+#               这种情况下,*用于作为位置参数和关键字参数的分界点,即它前面的是位置参数,后面则必须是关键字参数,并且它自
+#               身并不接受和吸收任何参数,也就是说它的前后各自该传几个参数就要传几个参数,需要注意的是,*之前的位置参数也可以
+#               用关键字参数传递,但是后面的参数必须用关键字参数传递.
+#           总之: 单独的*就是一个分界符,它前面可以是位置或者关键字参数,而后面则必须是关键字参数,并且它自身不吸收任何参数
+#               (*l是要吸收所有多余的位置参数的),即它不会影响参数传递的数量,如def fun(p1,..,pn,*,k1,..km),则实参传递的要求
+#               是:k1,..km必须用关键字传参,p1,..,pn可以用关键字或者位置参数传参,但是如果全部是位置参数的话,则位置参数个数
+#               必须<=n,不能大于n,因为*本身不吸收参数
+#           
+#
+#      (4) python中所有变量都是指针,所以形参其实也是一个指向实参的新的指针,按理说利用指针改变对象的值,则在函数
+#          外该值也会被改变的,但是在python中对象分为两种类型:mutable和immutbale,对于mutable对象来说(list,dict),
+#          形参改变对象的值,则在函数外也该变了,而对于immutable对象来说,对象一旦创建,就无法改变的,在函数体内只能
+#          用赋值语句改变对象,此时其实是新创建了一个对象,并让形参去指向它,所以此后形参和原始的对象以及实参变量就
+#          再无瓜葛了,原始实参对象和实参变量均不会改动.
+#
+#   08 默认参数注意事项:
+#      默认参数是在函数定义时计算的,并且只计算一次,后续每次调用函数时都是直接使用该值,不重新计算的,所以如果默认参数
+#      是mutable对象的话,则后续使用该默认参数的调用,都将使用同一个对象,形参指向同一个对象,如果其中一个函数将这个
+#      mutable对象修改了的话,则其他的调用也将获得一个被修改后的默认参数,而不是之前期望的参数,解决这种问题有一个办法,
+#      就是将默认参数设置为None,然后在函数体内用if语句判断,如果形参是None,则将该参数赋值为指定的类型如[]{}等
+#
+#   09 函数注释: 函数注释可以有多种方式,一种是在函数定义的时候,另一种是用""""""写在函数体内,写注释的用处是
+#       在help(fun_name),时可以有一段描述性文字,这段文字就是从函数的注释中来的.
+#       第一种: 在函数头中增加注释,冒号后的表达式是该参数的注释,等号后的表达式是参数默认值,->后的是返回值的注释
+#           def fun(arg1:exp1=default_v1, arg2:exp2=default_v2)->exp3:
+#               print("函数注释:", fun.__annotations__) #out: {'arg1':exp1_v, 'arg2':exp2_v, 'return': exp3_v}
+#               suite
+#       第二种: 在函数体内开始处用""""""括起来一段文本作为注释,如google风格的注释如下,
+#           def fun(arg1, arg2)
+#               """
+#               the description of this function.
+#
+#               Parameters:
+#                   arg1 - arg1' description,eg.type,default value
+#                   arg2 - arg2' description 
+#
+#               Returns:
+#                   the description of what is returned
+#
+#               Raises:
+#                   KeyError - raises an exception
+#               """
+#       第三种: 设置fun.__annotations__属性,这是一个字典,其中的键值对会被作为注释,属于动态注释方法,前两种是静态
+#               方式,第三种是动态方式,此种方式设置的,在help(fun)中是没有的
+#               def fun(x:'the x par int',y:int)->"this is the return value":
+#                   """
+#                   hahaha  i am also the annotions, it will in help(fun)' info
+#                   xixi
+#                   """
+#                   fun.__annotations__["x"] = "wo shi x"
+#                   fun.__annotations__[y] = "wo shi y"
+#                   print(fun.__annotations__)
+#                   print(x+y, "HHHH")
+#                   fun(200,300) 
+#                   # out: {'x': 'wo shi x', 'y': <class 'int'>,'return':'this is the return value', 300:'wo shi y'}
+#                   # out: 500 HHHH
+#   10 嵌套定义函数:
+#      (1) 在python中可以定义嵌套函数,嵌套函一般是用于装饰器中,此时外层函数是把里层定义的函数返回,但是也可以不用于
+#          装饰器,此时就是在外层函数中直接调用里层的函数,里层函数作为外层函数封装的一个内部功能
+#
+#      (2) 嵌套函数中最重要的是变量作用域问题:外层函数的标识符(变量,形参,函数名,嵌套类名,外层函数本身)均可在里层函
+#          数使用,并且如果要使里层变量的改变也作用于外层变量,则需要用nonlocal关键字声明,这和global声明全局变量的效
+#          果是一样的,注意global只能用于全局变量,nonlocal只能用于这种"全局的局部变量"(标准叫法: 自由变量),不能混用
+#
+#          如果里层定义了同名变量,则会屏蔽掉外层的,除非用了nonlocal关键字声明该变量,需要注意的是,不能先使用外层变量
+#          然后再定义同名变量(这一点也对于全局变量和全局函数内的局部变量也是一样的),因为局部变量的作用域是整个函数
+#          所以解释器会认为该变量是局部变量,而不是全局变量,但是这个局部变量又不能在定义之前使用.
+#          ps: 这是因为python中变量作用域和使用范围不同造成的,变量的作用域是整个外层范围,而使用范围是从定义变量处到
+#          范围结尾处,如函数内定义的变量,作用域是整个函数内,使用范围是定义处到函数体结束
+#      
+#      (3) 闭包: 指嵌套定义函数,并且外层函数返回里层函数时,此时解释器不止保留了该函数,而且把里层函数使用到的外层标
+#          识符在该次外层函数调用时的值保存下来了,把这些外层变量值和里层函数一起称为函数闭包,闭包有时也专指依赖的
+#          外层标识符,对于嵌套定义的函数来说,闭包的支持是必须的,因为外层函数执行后,局部变量都销毁,但是如果要单独
+#          使用里层函数的话,则它的运行环境还应包括外层函数中的相关变量
+#          ps: 可以使用__closure__属性查看函数的闭包,全局函数的闭包是None,嵌套函数的闭包是外层标志符集的子集,这
+#          个子集是在里层函数中真正使用过的外层标识符(包括用nonlocal声明但是没有使用的),不包局部同名的变量
+#       
+#   ps: python中函数名也是一个变量,和普通变量一样,所以如果定义了一个函数名为ff的函数,如果后面在定义
+#       一个变量叫ff,则原来的函数也无法使用了,这一点在C++中也是一样的,也就是说局部标识符名优先于全局标识符.
+#   
+#   ps: python中的函数也是一个类对象,是function类的对象,可以用fun.__class__或者type(fun)查看,并且由于
+#       function这个标识符并没有定义,可以通过Fun=type(fun),使得Fun就是function这个类型来间接使用
+#   
+#   ps: 在python中函数定义和类定义都是可执行语句,也就是说会执行定义函数或这类的语句的,这也就能解释默认参数
+#       在定义函数是被执行的原因了
+
+#18 python模块:
+#   01 python中的模块可以是任何一个包含python代码的py文件,可以直接用import 文件名(无py后缀)导入,
+#   但是导入不一定成功,因为python解释器会按顺序在三个目录中寻找:01 当前目录(正在执行的py文件所在目录)下找模
+#   块名,02 在PYTHONPATH环境变量(需自己设定)指定的目录下寻找模块名,03 在系统安装目录下寻找模块.如果当前py文
+#   件不在上述三个目录下,则导入出错. 如果模块在某个目录下,但是不是该目录的直接子文件,则在import时要把模块的
+#   祖先目录(直到某个祖先目录是该目录的子文件夹)也写上,并且用.分隔多级目录.
+#
+#   02 导入用户自定义模块有三种方式:01 import sys; sys.path.append("模块路径名"), 02 设置PYTHONPATH环
+#   境变量,把模块的路径添加进去,用:隔开多个路径, 03 创建后缀名为.pth的文件,并将需要的模块路径名写入进
+#   去,一行写一个,不能用~代表home目录,不能一行用逗号分隔多个路径,最好是写绝对路径(好像是不能用相对路径),
+#   然后将该文件放在以下四个目录之一之下: /usr/local/lib/python3.6/dist-packages, /usr/lib/python3/dist-packages,
+#   /usr/lib/python3.6/dist-packages, ~/.local/lib/python3.6/site-packages. 
+#   ps: 可以通过import site;site.getsitepackages()查看pth文件可以存放的目录
+#   ps: 可以在sys.path中查看自定义模块路径是否导入了python环境中,如果列表中没有刚才添加的自定义模块路径名
+#       则说明没有添加成功.有可能出现的错误是:PYTHONPATH环境变量设置出错,如,没有用export命令,同时用了引号和~;
+#       或者是pth文件中的路径名写错了.查看PYTHONPATH变量是否正确设置,可以用os.environ["PYTHONPATH"]查看.
+#   ps: 还可以局部导入,就是在一个函数中导入某个包,此时包的作用域在函数内,函数外是不可用的
+#   ps: from pkg import A, 则A会在当前名字空间中,而pkg则不在,即可以直接使用名字A,但是不能使用名字pkg
+#
+#   03 import 模块名 不仅会导入该模块,而且会执行该模块中的代码,所以模块中一般要写 if __name__ == "__main__":
+#   如果是用import导入该模块,则if语句不成立,如果是解释器执行该模块,则if语句成立,从而执行需要的测试代码,也就是
+#   说写好一个模块后,测试性代码等可被直接执行的代码需要放在if语句块内,使得如果模块是被import而不是直接别解释器
+#   执行时,这些测试性代码可以不被执行.
+#
+#   04 每一个导入的模块都是module类的一个实例对象,可以使用type(模块名)查看
+#      只有from import才能导入类,函数,变量,import只能导入包,子包,模块
+#      as语句用于重命名导入的对象,它既可以用于from import, 也可以用于import
+#   
+#   05 reload("模块A")可以重新导入模块A,当修改了模块A之后,如果想要使用修改后的模块,则要么就是重启python 解释器,
+#           要么就是使用importlib.reload("模块A")对模块A进行重新导入,此时可以不用重启解释器而使用修改后的模块.
+#      help("模块A")可以查看模块A的属性,方法和类
+#      dir("模块A")可以查看模块A的命名空间中的所有名字以及模块的属性名,ipython中dir()可以查看本环境命名空间中的所有名字
+#      vars(obj)可以查看obj拥有的所有属性,obj可以是对象,类,模块,obj必须有__dict__属性,和dir()方法差不多
+#
+#   06 模块的常用属性:
+#       __name__:如果该模块是主模块,则其值为"__main__",否则就是该模块文件名去掉后缀,该属性值可以修改
+#       __doc__:在第一个语句之前的第一个由单双三引号包裹的字符串,就是该模块的doc string
+#       __file__:是一个可选属性,它的值是该模块的绝对路径文件名,其实doc和file属性是help()信息中的name和file信息
+#       __dict__:是一个字典,包含该模块中可以使用的所有属性,名字以及它们的值,其中包括builtin对象的信息
+#       __all__:是一个列表,用于控制import *和from module import *可以导入的对象
+#   
+#   07 python中除了有很多built-in函数外,也还有一些built-in模块,这些模块都是用C语言写的,同时标准库中也有一些模块
+#           是用python写的,用于提供一些有用的工具.
+
+#19 常用的内置模块:
+#   01 os模块: 主要是用于操作目录
+#       os.mkdir("path") 创建一个新的文件夹,但是不能一次创建多级目录
+#       os.chdir("path") 从当前目录进入到"path"下
+#       os.getcwd()      返回当前工作目录
+#       os.rmdir("path") 删除path目录,只能删除空目录,并且不能删除当前目录
+#       os.listdir("path") 列出path目录下的所有子项,包括隐藏的项目
+#       ps: "path"中可以使用..和.代表上级和当前目录
+#
+#   02 sys模块: 主要是用于操作和获取python的运行时环境信息
+#       sys.argv    是一个列表,用于获取程序的命令行参数,argv[0]是程序名
+#       sys.exit()  退出python程序
+#       sys.maxsize 是一个int整数,数值为2^63-1,是变量能取得的最大int值
+#       sys.path    是一个列表,用于解释器搜索所有模块的搜索路径
+#       sys.version 是一个字符串,返回pyhton解释器的版本信息
+#
+#   03 math模块: 提供一些基本初等函数,角度制转换,数学常量等
+#       math.pi     3.141592653589793,圆周率π,是周长circumference和直径diameter的比值
+#       math.e      2.718281828459045,欧拉常数,Euler's number
+#       math.radians(60) 将角度转换为弧度
+#       math.degrees(math.pi/3) 将弧度转换为角度
+#       math.sin(),cos(),tan(),asin(),acos(),atan()
+#       math.log(x),math.exp(x) 两个均以e为底 log10(), pow(x,y), sqrt()
+#       math.floor(x),ceil(x)   向下和向上取整
+#
+#   04 statistics模块: 提供一些对序列和集合对象的统计函数
+#       mean(o)     求集合或者序列o的平均值,o必须是数值型数据
+#       median(o)   求中位数,如果元素数是偶数,则返回中间两个数的平均值,元素数是奇数时
+#                   集合可以是str类型,否则只能是数值型数据
+#       median_low(),median_high() 元素数是偶数时,分别返回中间偏小,偏大的数,元素数是奇数时,
+#                   三个median函数返回的值是一样的
+#       mode(o)     返回o中的众数,元素可以是任何类型,并且可以混合类型,但是如果有>=2个对象的
+#                   数目相同且最大,则抛出异常
+#       stdev(o)    求样本标准差,自由度是n-1,对应于无偏估计
+#       variance(o) 求样本方差,是样本标准差的平方
+#       pstdev(o)   求总体标准差,自由度是n
+#       pvariance(o)求总体方差,是总体方差的平方
+#
+#   05 collections模块: 提供python内置数据结构(list,tuple,dict等)的替代类型
+#       namedtuple("type_name", ["f1", "f2", "f3"]), 返回一个数据类型的变量,类型名字是type_name,
+#           类型拥有的域是f1,f2,f3. 如:
+#           T = collections.namedtuple("Stu", ["name", "age", "score"])
+#           s = T("cx", 24, 100) # 虽然s的类型是Stu,但是只能用T来定义实例,而不能用Stu来定义
+#           则 s.name="cx"=s[0], s.age=24=s[1], s.score=100=s[2]
+#           ps: 定义实例时,不同实例的各个域类型可以不同,但是不能单独修改域的值,这一点和tuple一样
+#       
+#
+#       OrderedDict()   返回一个有序字典对象,该对象的基本接口与内置的dict一样,但是该字典对象是有序的
+#                       它会记住keys首次插入时的顺序,遍历时按照该顺序遍历.
+#
+#       deque([1,2,3])  返回一个列表对象,该对象和内置的list接口基本一样,但是它的效率更高
+#           q = collections.deque([1,2,3])
+#           q.appendleft(x), q.popleft(), q.append(x), q.pop(), q.insert(), q.remove()
+#
+#   06 random模块: 生成随机数
+#       seed(x)     设置随机种子,x可以是任意一个hashable对象,亦即不可变immutable对象
+#       random()    返回一个[0,1]内的随机浮点数
+#       randint(1, 100) 返回[1,100]内的随机数
+#       randrange(0, 101, 10) 返回[0,101)且间隔为10的数,即0,10,..,100,此函数的参数和range()一样
+#       choice(seq) 从seq中随机选一个元素返回,参数不能是字典和集合,因为参数必须支持索引
+#       sample(o, k) 从o中选择k个元素返回,o可以是seq or set,不能是字典
+#       shuffle(o)   把o的匀速顺序打乱,注意o只能是list对象,因为o必须可以索引,并且mutable  
+
+#20 python包:
+#   01 python包就是一个文件夹,只是这个文件夹下必须有一个文件名为__init__.py的文件,python解释器就是
+#       根据是否有__init__.py文件来判断文件夹是否为包的,然后包中的所有代码都在其子目录或者py子文件
+#       中,而包本身是没有代码的,也就是说python代码永远都在py模块文件里.
+#   
+#   02 __init__.py文件除了标记python包外,在此文件中还可以加入import语句,这样可以把包里的模块中的
+#       一部分接口暴露出来,假设本包为pkg,具体语法如下:
+#       from .module1 import class1, fun1, v1
+#       from .subpkg1.module2 import class2, fun2, v2
+#       之后,如果使用from pkg import *,则__init__.py中导入的名字可以直接使用,就像它们是直接在pkg包
+#       中一样.
+#   ps: 对于没有在__init__.py中import的子模块或子包中的资源,其实通过直接导入子模块或子包仍然可以使用
+#   只是如果用from pkg import * 的方式将没法使用,也就是说__init__.py可以将包中的子项资源直接变成像
+#   是在本包中的资源一样使用,如果__init__.py文件为空,则from pkg import *将不会导入任何标识符,这是因为
+#   当导入一个包时,解释器会自动执行__init__.py文件,从而这个文件中的import语句被执行了,所以这些在包中导
+#   入的标识符才能被使用,此时pkg这个名字是不能用的,但是__init__.py中导入的名字均可以用,如果导入时有多
+#   级包,则这些包的__init__.py会按顺序被执行
+#   
+#   ps: 如果__init__.py文件为空,则import pkg 这个语句只会执行__init__.py这个空文件,相当于什么也没做,此
+#   时是不能使用pkg包的内的模块或子包的,因为它们都没有被导入,只有在__init__.py中显示导入pkg的子模块和
+#   子包后,import pkg 才能使用pkg.subpkg或pkg.submodule来使用pkg包中的资源,但是import pkg.subpkg,则又
+#   是可以使用subpkg的,所以import pkg和from pkg import *这两条语句效果是一样的,只是import pkg的形式中,
+#   当前名字空间中只有pkg,而没有pkg中的资源,而from方式则当前名字空间中只有pkg中的资源,而没有pkg这个名字
+#   即它们的区别就是from import 和import的区别
+#   总结:import pkg语句执行时:把pkg加入到当前名字空间;执行__init__.py文件(如果是模块,则执行该模块文件);
+#       from pkg import *,则是执行__init__.py文件,但是不会将pkg加入到名字空间中
+#       ps: 如果是import pkg,则__init__.py中导入的名字(如: from .module1 import class1 )是不能直接使用class1
+#           这个名字的,要用pkg.class1, 而from pkg import *方式则可用class1,不需要加pkg前缀,如果是 
+#           import pkg.module1,则此语句会执行__init__.py并把pkg加入到名字空间中,module1是不加入的,并且__init__.py
+#           中的名字(如上面的class1)也是不会加入的
+#   ps: 在__init__.py中导入名字时,或者用from xx import yy, 或者用import xx.yy as yy,不能是import xx.yy,前两者均可
+#       认为本包中有yy这个名字,后者则上面都不能导入,我猜是因为后者不是一个名字(因为有.)
+#       另外,__init__.py中如果用相对导入的方式,如from .subpkg1 import *,则subpkg1这个名字也会被导入进来,如果不是
+#       相对导入方式,则不会被导入.
+#       最后,如前所述,__init__.py中导入的名字(from 或者 as方式)相当于是本包中定义的名字一样,需要注意的是,此种用法
+#       是可以递归的,就是说包A的__init__.py中导入了名字aa,在包B的__init__.py中又有:from A import aa,则aa将会成为
+#       包B的名字,即以后可以直接从包B中使用aa,这一点在是tensorflow包导入的非常重要的机制
+#
+#   ps: 在__init__.py文件中导入了的资源,from pkg import * 和 import pkg这两种方式均可直接使用这些
+#   在__init__.py中导入的资源,而如果__init__.py是空文件,则必须显示导入pkg的资源(包括模块)后才能使用
+#
+#   03 将自定义包安装到python环境中
+#       (1)在待安装包的同级目录下创建一个setup.py文件
+#       (2)在setup.py文件中调用setuptools.setup()函数,setup.py代码如下
+            from setuptools import setup
+            setup(
+                name='mypkg1',  # 此名字为pip列表下使用的名字,卸载时也用该名字
+                version='0.1',
+                description='testing installation of package with pkg1.',
+                url='#',
+                author='caixiong',
+                author_email='caixionggle@gmail.com',
+                license='THU',
+                packages=['cxpkg1', 'cxpkg2'],    # 待安装的真正的包名列表,安装好后使用包时用此名字
+                zip_safe=False  # 是否压缩安装,True是压缩安装
+            )
+
+#       (3)执行 pip install --user --upgrade . # --user --upgrade选项可以不加的, '.'代表当前目录
+#
+#   04 python中的包内导入方式是指:以包为层次结构,包内的模块之间的导入,此时模块是位于包的层次结构内的,
+#       不是作为单独的独立模块(py文件)被使用.
+#       python包内导入方式有两种:相对方式和绝对方式,相对导入方式使用相对路径(. .. ...等),例如
+#       from . import moda; from .moda1 import funa1; from ..pkgb import modb; from .. import pkgc;
+#       需要注意的是,相对路径(. .. ...等)只能用于from之后,不能在impoort之后,即import .moda; import ..pkgb
+#       都会有语法错误. 而绝对导入方式则使用绝对路径(这个绝对路径是指从顶层包名开始的),其实只要没有以. ..等
+#       打头的都会被认为是绝对导入方式,只是此时如果路径不是从顶层包名开始,则会出现找不到的错误,其实包内绝对
+#       导入方式和普通的导入是一样的,只要能让解释器找到该包即可
+#   ps: 相对导入方式不能直接运行模块文件的,即python pkg/moda.py 是非法的,但是可以用-m选项,以模块方式运行,即
+#   python -m pkg.moda, 这可以用来测试模块之间的导入是否正确.还需要注意的是,第一种方式,sys.path的当前路径(第一个
+#   字符串即是)会被置为moda.py的父目录,而python -m pkg.moda,则会被置为空串'',也就说说是执行python -m这条命令的路径
+#   
+#   ps: 还需要注意的是,python dirA/aa.py这种方式中,sys.path是./dirA,即aa.py的父目录,这是python解释器寻找模块用的
+#       "当前路径",实际上程序中的当前路径是dirA的父目录(用sys.path.abspath(".")查看),这就是说如果程序中的文件名
+#       用了相对路径,则这个相对路径是dirA的父目录,而不是dirA这个python解释器认为的当前路径
+
+#21 python迭代器和生成器:
+#   01 python中的可迭代对象(类型):只要该类型实现了__iter__()方法或者是__getitem__()(迭代器协议或序列协议),则这个
+#       类型的实例就是可迭代对象.需要注意的是,__iter__()方法必须返回一个可以遍历该类型对象容器的迭代器,否则这个
+#       可迭代类型并不是一个真正意义上的可迭代对象.
+#      ps: 判断一个对象是否是可迭代的,可以用:collections模块的Iterable类和isinstance()方法: isinstance(o,Iterable),
+#      返回True,则说明o是一个可迭代对象,或者直接用hasattr(o, '__iter__')方法来判断.
+#   
+#   02 python中的迭代器: 同时实现了__next__()和__iter__()方法的类才是一个迭代器类型.
+#       对于迭代器,可以不断调用next方法,依次获取其值,同时最后一个元素取出后,再调用next会出现异常,并且需要注意的
+#       是,迭代器只能使用一次,是不能重复使用的
+#
+#   03 python中的生成器: 由生成解析式或者生成函数产生,生成函数就是普通函数中用yield关键字代替return关键字,yield
+#       关键字会使得此次值返回后,函数内的所有信息都被保存,下次调用时从yield的下一个语句执行,相当于恢复之前的执行流,
+#       并且需要注意的是,生成函数的调用不会执行函数体,只有当对其返回的生成器调用next函数时,函数体才被执行
+#   
+#   04 生成器是一个特殊的迭代器,它同样具有__iter__()和__next__()方法,只是这个迭代器是根据需要人为生成的,其他的迭代
+#   器一般是从可迭代对象上获取的,其实两者的效率是一样的,它们的特点都是需要的时候产生值,不占内存,并且只能一次性使用.
+#      生成器其实是python提供的一种更简便获得迭代器的方法
+
+#22 map filter reduce函数:
+#   01 map(): map(fun, iterable [,iterable2,..]),返回一个map object,是一个迭代器
+#       例子: o=map(lambda x,y,z:x+y+z, [1,2],[3,4],[5,6]),需要注意的是,fun有几个参数,则后面需要跟几个可迭代对象
+#       如果几个迭代对象的长度不一致,则最终结果的长度取最小的长度
+#
+#   02 filter(): filter(fun, iterable), 对于iterable中每个元素x,如果fun(x)返回True,则x被加入到结果迭代器中,也就是
+#       用fun对iterabl中的元素进行过滤,返回剩余元素的迭代器,fun是一个参数,且返回一个bool值
+#       例子: filter(lambda x:x%2==0, range(10)) #out:一个含0,2,4,6,8的迭代器
+#
+#   03 functools模块的reduce(): reduce(fun, iterable), 返回一个单个值,使用fun对iterable进行reduce操作,fun是两个参数
+#       例子: funtools.reduce(lambda x,y:x*y, range(1,6)) #out:120
+
+#23 异常处理: 由于一个异常发声后,如果没有捕获和处理,则程序会立即结束,所以对于可能出现异常的代码,要进行适当处理,使得
+#           即使发声了异常,程序也不会立即退出,而是作一些自定义善后工作后才退出
+#   01 异常处理代码结构:
+#       try:
+#           # statements likely occur except
+#       except error_type_one:
+#           # statements to handle error_type_one
+#       except error_type_two:
+#           # statements to handl error_type_two
+#       ...
+#       except:
+#           # 单独的except语句可以捕获所有异常
+#       else:
+#           # statements executed if no error occur
+#       finally:
+#           # executed whether the error occur or is caught
+#       
+#       (1) 除了except代码块,其他代码块都只能有一个,但是至多只能有一个except语句块被执行
+#       (2) 没有异常发声时,执行else语句块;有异常发声且别捕获时,执行对应的except语句块;有异常发声但是没有对应的except
+#           语句块可以捕获之时,程序会执行finally语句块,然后立即结束.
+#       (3) finally语句块,无论是否有异常,以及异常是否被捕获,都会执行的
+#       (4) 如果异常没有发声,或者被正确捕获了,程序都不会结束,会接着执行finally语句块后的代码
+#       (5) try finally, try except均合法,但是try else则有语法错误,也就是说esle语句块必须出现在except语句块后
+#       (6) 在except 特定类型的异常时,可以用as结构,如 except error_type as msg: print(msg)
+#   
+#   02 主动抛出异常:
+#       python中用raise关键字主动抛出异常,如:
+#       if x > 100:
+#           raise ValueError()      # 用户也可以定义自己的异常类,然后使用raise抛出
+#       
+#       ps: raise关键字后面可以不跟异常类型,直接就是raise,这种情况一般是用于except语句中,就是捕获异常后,如果需要继续将这个异常
+#       抛出,则使用raise,注意,如果本身没有异常发声,则raise也会抛出一个RunTimeError
+#   
+#   03 assert关键字: assert后面跟一个bool表达式,如果表达式为True,则继续执行下面的语句,如果为False则抛出异常AssertionError
+#       assert exp1 [,exp2] <=> if not exp1: raise AssertionError(exp2), exp2可有可无,[,exp2]是0或1个的意思
+#       try:
+#           ...
+#           assert bool_expression, "传给AssertionError异常的说明信息,此信息是可写可不写的"
+#           ...
+#       except AssertionError as msg:
+#           print(msg)  # bool_expression 后的字符串将会被打印出来
+
+#24 with结构: 对于上下文管理器对象,使用with结构进行处理,可以避免显示的try except异常处理
+#   01 上下文管理器类型: 实现了__enter__()和__exit__()方法的类型,就可以使用with结构了
+#      __enter__(self): 实例方法,需要返回一个对象作为with结构的上下文信息,如文件对象等
+#      __exit__(self, exc_type, exc_value, traceback): 实例方法,发声异常时,解释器会将异常的类型,值,调用栈作为后三个参数传入,此
+#      方法的返回True或者False,如果要将异常继续抛出,则返回False,如果想让程序继续执行不抛出异常,则返回True即可
+#
+#   02 with结构用法: 
+#       with expre1 [as target1], expre2 [as target2 ]...:
+#           suite   # 关于target1,taret2,..的代码
+#
+#   03 with结构的执行流程:
+#       with EXPR as VAR:
+#           BLOCK
+#       <=>
+#       mgr = (EXPR)
+#       exit = type(mgr).__exit__  # Not calling it yet
+#       value = type(mgr).__enter__(mgr)
+#       exc = True
+#       try:
+#           try:
+#               VAR = value  # Only if "as VAR" is present
+#               BLOCK
+#           except:
+#               # The exceptional case is handled here
+#               exc = False
+#               if not exit(mgr, *sys.exc_info()):
+#                   raise
+#               # The exception is swallowed if exit() returns true
+#       finally:
+#           # The normal and non-local-goto cases are handled here
+#           if exc:
+#               exit(mgr, None, None, None)
+#   04 with结构执行过程: 
+#       with EXPR as VAR:
+#           BLOCK
+#       (01) 首先计算表达式EXPR,该表达式的必须返回一个上下文管理对象(有正确的enter和exit方法的对象)
+#       (02) 调用该对象的enter()方法,将返回值赋值给VAR
+#       (03) 执行BLOCK代码块,其中一般是含对VAR变量的使用和处理
+#       (04) 如果执行BLOCK没有发生异常,则调用exit(None,None,None)后正常结束with结构
+#            如果执行BLOCK发生了异常,则调用exit(exc_type,exc_value,tracback),
+#               如果exit()函数返回True,则继续执行with后的语句,程序不结束
+#               如果exit()函数返回False,则将出现的异常再次抛出,程序结束
+#   05 with A() as a, B() as b:
+#          suite
+#      <=>
+#      with A() as a:
+#          with B() as b:
+#              suite
+#   ps: 使用with结构可以简化异常处理,但是前提是要处理的对象实现了上下文管理协议(enter和exit方法)
+
+#25 __builtins__模块几个函数(类型): 以下的标识符其实都是python内置的类类型
+#   (1) type()  即type类,构造器接受1个或者3个参数
+#       type(o): 返回对象o的类型,其实是调用o.__class__属性,返回的类型名是可以用于定义变量的,如果o
+#                本身是一个类型,则返回值是type本身,并且所有的类型作为type()的参数时,其返回类型都是type
+#       type(name, bases, dict): 此方法返回一个动态自定义类型(class 语句是定义静态的自定义类型)
+#                该方法(type类的构造器)一共三个参数,name是字符串,是新类型的名字,用于作为新类型的
+#                __name__属性,bases是一个元组,是该新类型继承的基类类型,可以为空元组,成为新类型的
+#                __bases__属性,dict是一个字典,是新类型的所有属性字典,成为型类型的__dict__属性
+#                ps: 新类型的名字是name,如果bases是空元组(),则基类自动变成object
+#                ps: 新类型的使用必须是 A = type(...),然后用A来定义对象,如果没有赋值,则新类型就没法使用
+#                ps: dict参数,可以是dict(a=1,b=2,f=fun),如,A=type("A", (), dict(a=1,f=fun)),此时A类型将
+#                   拥有属性变量a,属性方法f,需要注意的是,属性a是作为类属性而不是实例属性,也可以定义__init__
+#                   属性作为构造器,此时只要求传给__init__的函数符合构造器的要求即可
+#                ps: name, bases, dict都是位置参数, 不允许关键字传参
+#                ps: 三个参数时, 返回的是一个新的类型, 名字为__main__.name, 返回值是指向该类型,需要注意的是
+#                   dict中的元素都是作为类属性存在的, 可以直接通过返回的类型来访问
+#   
+#   (2) property(fget=None,fset=None,fdel=None,doc=None),返回一个描述器类对象,将该对象命名为相应的客户类的属性
+#       则可以实现不用函数调用符(),就能访问客户类的私有属性了,其实就是相当于对java中的get,set方法进行了封装,使
+#       得调用get,set方法更方便了.
+#       class person:
+#           def __init__(self,name="BB"):
+#               self.__name = name
+#               print("hello {}".format(name))
+#           def getname(self):
+#               print("getname is called")
+#               return self.__name
+#           def setname(self,name):
+#               print("setname is called")
+#               self.__name = name
+#           def delname(self):
+#               print("delname is called")
+#               del self.__name
+#           name = property(fget=getname,fset=setname,fdel=delname,doc="I am the doc of __name")
+#       p = person()
+#       p.name #out: getname is called \n BB
+#       p.name = "cxiong" #out: setname is called
+#       p.name #out: getname is called \n cx
+#
+#       ps: 除了直接调用property()外,还可以使用注解@的方式,见下面的python类介绍
+#       ps: 关于描述器类协议,比较复杂点,此处没有过多介绍了
+#       ps: 自定义的一个property类,在jupyter nootbook中,有__set__,__get__的介绍,(~/python/codes/myproperty.ipynb)
+
+#26 python装饰器简介:
+#   01 装饰器本身是一个函数(callable对象),它接受一个callable对象作为参数,然后返回一个callable对象,python中的
+#      callable对象一般是函数,但是也有例外,如,只要某个对象重载了__call__()方法,则这个对象就是callable的.
+#      ps: @后面跟的标识符,可以是函数名,类名,类对象(callable)三种,因为这个三种都符合圆括弧调用操作语法,这是因为
+#          @本身就是一个语法糖,如@AA def fun():suite,则解释器会将@AA替换为 fun=AA(fun),这可能就是代码上的简单替换
+#          所以只要@后的标识符符合圆括弧调用即可,并且这也解释了三层嵌套装饰器的原理,此时@后面确实就是一个调用语句
+#      ps: 强调!强调!强调! @只是一个语法糖,是方便写程序的,最终的代码应该就是fun=AA(fun)的形式!!
+#   
+#   02 装饰器的作用是在不改变原来函数的代码的前提下,给原来函数增加一些额外的功能,也就是面向切面编程,如用于类
+#      方法的staticmethod()和classmethod(),就是改变了原函数的参数个数
+#
+#   03 装饰器例子:
+#       def debug(fun):     # 定义装饰器函数
+#           def wrapper(*args, **kargs):
+#               print("DEBUG: enter{}()".format(fun.__name__))
+#               return fun(*args, **kargs)
+#           
+#           return wrapper  # 返回修改过的函数对象
+#
+#       @debug              # 装饰器使用
+#       def greet(name):
+#           print("Hello {}".format(name))
+#
+#       def play(name):
+#           print("Hello {}"format(name))
+#       play = debug(play)  # 和@语法是等价的
+#   
+#   04 注意上面例子中的装饰器函数debug本身是不带参数的,如果要带参数,则需要再加一层嵌套,并且@处写一个函数调用语句.
+#      如果被装饰的函数没有参数,则可以减一层嵌套,此句有误,即使被装饰函数没有参数,也必须有两层嵌套定义,因为必须先
+#      嵌套定义一个新的函数(对原函数装饰之后的函数),然后再将这个新函数返回,如果没有嵌套定义,则只能返回原来的函数
+#      本身了.所以装饰器的本质就是在函数内部重新定义一个新的函数,并将这个新函数返回,所以必须是嵌套的.
+#      
+#      一般来说,装饰器最多只要三层嵌套就可以了,此时最外层的函数可以接受额外的参数,第二层的函数接受被装饰函数作为
+#      参数,第三层的函数就是最终要返回的装饰器了,负责对原函数进行封装改造.此时装饰器的用法是
+#           @最外层函数(额外参数)   # 类装饰器也可以这么用
+#           def 被装饰函数():suite
+#
+#      需要注意的是,@所在的语句会被执行一次,也就是说装饰器函数会被执行,除了最里层的新函数外,外层的函数都会被执行,
+#      最外层的函数被调用是因为@后面写的是一个调用语句(有圆括弧和额外参数),所以解释器是先执行这个调用语句,然后将
+#      返回的对象作为装饰器来作为@的操作对象,从而第二层的函数被调用就是因为@的原因了.
+#
+#   05 此外还可以把装饰器定义成一个类,这个类实现__call__()方法成为callable对象即可.此时,如果装饰器不需要额外参数
+#      则构造器的第二个参数是fun即可,此时__call__定义成装饰函数,用法是@类名,而如果要额外参数,则构造器第二个参数之
+#      后的是额外参数,__call__方法的第二个参数是fun,在__call__内部还需要定义个嵌套函数,作为装饰函数
+
+#27 python类:
+#   01 典型的python类通常包含四个部分:Constructor,Instance Attributes,Class Attributes,Methods
+#       class person:   
+#           count = 0   # class attribute
+#           def __init__(self, name="cx", age=24):  # constructor
+#               self.name = name    # instance attribute
+#               self.age = age      # instance attribute
+#           def show(self): # method
+#               print(self.name, self.age)
+#       
+#       ps: 类名后面跟一个(),则()里的类型将作为父类,如class person(B1,B2): 指定B1,B2为父类,如果没有指定,则默认object为父类
+#       ps: 类定义是一个可执行语句,也就是类定义会被执行一次,类体也会执行一次,但是类体是在一个新的执行帧里运行,会创建一个局部
+#           命名空间,类体执行帧执行完成后,执行帧结束,但是会保留类的局部名字空间,这也是为什么在类体中可以写语句的原因.
+#
+#   02 构造器__init__()函数: 必须至少有一个参数,且第一个参数比较特殊,会被解释器自动传入实例本身(相当于c++中的this指针),
+#       第一个参数的名字可以任意,但是一般约定命名为self,构造器可以有return,但是只能返回None类型(即 return 或 return None),
+#       构造器由解释器在构造对象时自动调用
+#
+#   03 实例属性: 构造器内的第一个参数self.vname的变量被定义为实例属性,各个实例的实例属性的名字
+#       相同,但是类型可以不同,实例属性的类型由构造器对其的初始化值确定,并且可以在使用中修改
+#       
+#       ps: 实例属性不一定要在__init__()内定义,也可以在其他方法内定义,但是某个方法内定义的属性必须在该方法被首次调用之后
+#       才被创建,所在在构造器内定义属性有一个好处,因为构造器是在所有方法调用之前调用的,所以其中定义的属性在任何方法内均可使用
+#       ps: 类中定义的方法和属性名不能重名,否则会有冲突,但是类属性和实例属性可以重名,此时实例使用实例属性,类名使用类属性
+#       ps: 类中定义的标识符均可通过del关键字删除(其实Python中的所有用户自定义标识符均可删除),类名也可以删除,
+#           可以重新赋成其他值(如int),并且可以定义一个其他变量指向该类.
+#       ps: 类名不能访问实例属性,会抛出属性错误异常,dir(A)和dir(A())结果是不同的,dir(A())会多显示一部分:即所有实例属性变量
+#       ps: o.__dict__属性中,存放且指存放实例o的所有实例属性(不包括实例方法)
+#
+#   03 类属性: 类似于C++中的静态属性,但是不完全一样,python中的类属性可以用类名和对象名读取,但是修改的话,如果
+#       是用类名,则所有对象的类属性的值均被修改,如果用实例名,则只是该实例的类属性被修改,其他实例的该属性值不变,
+#       这一点是和C++不同的,并且一旦某个实例的类属性被修改了,则这个值似乎就变成了该实例的实例属性了,因为再次
+#       用类名修改类属性后,该实例的类属性保持不变,而其未修改过类属性的实例类属性值都同步改变
+#       ps: 在类方法中使用类属性,或者是用类名.属性名,或者是用self.属性名,不能直接用属性名,即类作用域并不是方法作用域的全局空间
+#           这一点和C++是不同的,在C++中,静态和非静态成员变量在方法内均可见
+#       ps: 如果类属性是一个mutable对象,如list,则通过实例改变该对象的值,则所有类和实例的该属性均改变,而如果是immutable对象,
+#           用实例给属性赋值,相当于改变了指向,所以不会影响其他实例使用该属性.
+#   
+#   ps: python中的类属性是直接定义在类体内的,实例属性则是定义在方法内的,并且是通过解释器隐式传的参数self(实例本身)来定义的.
+#   ps: python中的实例属性很特别,它除了可以在方法内定义,还可以在类体外定义,如,o.x1=100,o.x2=200,此时实例o会增加两个属性x1和x2
+#       这只是该实例多了属性,其他实例不受影响,类属性也不受影响,并且需要注意的是,如果新增加的属性名和类属性名同名,则相当于是给
+#       该属性分配了新的内存空间,则此属性不再是指向这个类的公共空间了,此时如果用类名改变类属性,则不会影响该实例的这个属性了.
+#       由于这个特性,可以在方法内用self引用暂时还没有定义的属性,只要在调用该方法之前,把该属性添加进去即可.
+#   ps: 除了可以给实例直接添加属性和方法外,也可以直接添加类属性,类方法, 只是添加实例方法式不需要self参数,而添加类方法时需要
+#       并且可以定义一个__slots__=('att1','att2'),则实例只允许属性名是att1和att2的属性,在类内和类外均不允许添加其他属性.
+#   ps: python类体作用域是方法作用域的全局空间,这可以从A.__class__=type,A().__class__=A可以看出来,也就是说如果实例对象中
+#       定义了和类属性同名的属性,则会屏蔽掉类属性,但是如果实例中没有定义同名属性时,则在实例局部空间中没有搜到属性名后,会在
+#       类体空间搜索,然后就找到类属性了,还需要注意一点id(A.fun)和id(A().fun)是不相同的,说明这是两个不同的函数对象,但是它们的
+#       代码是一样的.
+#
+#   04 方法: 方法的参数可以是0或者>0个,如果是0个,则该方法只能用类名调用,因为用实例调用方法时,解释器会自动将实例本身
+#       作为第一个实参传递.如果是>0个,则第一个参数默认为实例对象本身,名字可以任意,但是一般约定命名为self.对于参数个数>0
+#       的方法,可以通过实例对象调用,也可以通过类名来调用.通过类名调用时,由于方法在定义时,方法内一般是默认第一个参数是
+#       实例对象的,所以需要传入的第一个参数是实例对象,后面的参数正常传递.而用实例对象调用时,第一个参数可以省略传递,因为
+#       解释器会自动把实例本身作为第一个参数传递进去.
+#       
+#       ps: 其实在定义方法时本来是可以随意定义参数,不需要考虑第一个参数是实例本身这个事情的,因为用类名调用时,和普通函数
+#       调用是一样的,需要几个参数就手动传递几个参数,只是用实例对象调用时,解释器会把实例本身作为第一个参数传递,所如果我
+#       们定义的函数是需要用实例对象来调用的,则第一个参数需要将之定义为实例对象本身,而如果这个函数用类名来调用,则不需要
+#       考虑这么多.此外,用类名也调用也可以起到和实例调用一样的效果,只是此时手动传入第一个参数为实例对象就可以了
+#       ps: 方法是不区分类方法和实例方法的,所有方法均可以通过类名访问,而属性变量则区分类属性和实例属性,类名不能访问实例属性
+#       ps: python中其实是有类方法和实例方法的,上述的讲的方法就是实例方法,它需要传入实例对象作为参数的,python中的类方法就是
+#           在定义方法的def语句上一句,用@staticmethod 注解(注释器),则该方法被定义成静态方法,用实例对象调用该方法时,解释器不
+#           会把实例本身作为参数传递了
+#       ps: ff=self.fun1 这样的用法中, ff是一个bound method对象, 它和普通的函数对象是不一样的, 它是和一个实例对象绑定后的方
+#           法, 此处是和self绑定, 也就是调用ff时, 会自动传入self作为第一个参数的
+#       
+#       class C:
+#           def fun(x,y,z):
+#               print(x)
+#               print(y+z)
+#       c = C()
+#       C.fun(100,200,300)  # 100 \n 500
+#       c.fun(200,300)      # <__main__.C object at 0x7f321c88f828> \n 500
+#       综上: 函数第一个参数的传递取决于函数定义时的语义,如果定义时第一个参数是作为实例对象本身的,则用调用时第一个参数
+#       也需要传递对象本身(显示或隐式),如果定义时不是作实例本身使用的,则调用时必须用类名定义,并传入正确的参数
+#   
+#   05 访问控制符: 在python中,从语法层面来说总共就只有两种访问控制:public和private,python中的属性(和方法)名用双下划线__
+#       开头的变量(且<=1个下划线结尾),则在能在类内访问,在其他地方访问会报出异常,其余变量都是public.同时在python中也提供
+#       了一种约定,就是以单下划线开头的变量约定为protected类型,这只是一种约定,解释器并不提供强制检查,即在类外访问_开头
+#       的属性也是合法的, 需要注意的是, _开头的标识符, 用from module import * 是不会被导入进来的
+#       ps: 对于__开头的私有属性,也可以在类外访问,访问方式为:obj._classname__var,但是不建议这么做
+#           只是因为解释器将私有变量对外改了名字,不同版本的解释器可能改名字的方式不同,所以不要这么做
+#       ps: 双下划线开头且双下划线结尾的变量是特殊变量,不是私有变量
+#
+#   06 类方法的三个注解:
+#      (1) @staticmethod, 将此句放在方法定义前面,则该方法变成静态方法,此时实例调用该方法时,解释器不会将实例对象作为第一个参数
+#           传入,此时定义该方法时不需要考虑第一个参数self自身,python静态方法和C++中的静态方法基本一样,其唯一的区别就是python
+#			静态方法中访问类属性时需要用'类名.类属性名',这在C++中是不需要的,直接使用静态属性名
+#          ps: 这是因为staticmethod和classmethod本身是两个builtin函数,它们是装饰器函数,此处的装饰是改变了被装饰函数的参数
+#      (2) @classmethod, 此装饰器会使得解释器将类名作为第一个参数传入,无论是用类名还是用实例调用该方法都是这样的.
+#      (3) @property, property是一个描述器类,它实现了__get__(),__set__()__,__delete__()方法,同时它其实也是一个装饰器类,因为
+#          它的构造器接受函数作为参数,虽然构造器返回的自身对象不是callable类型的,也就是说它的返回值不是很符合装饰器协议,但是
+#          恰巧此处也不需要(不能)对property进行调用,而只是需要使用一个值.
+#
+#      (4) 例子:
+#        class A: 
+#  			 a = 100 
+# 			 def __init__(self,x,y): 
+# 			 	 self.x = x 
+# 				 self.y = y 
+# 				 print(x+y, "hello") 	
+#
+# 			 @staticmethod
+#			 def play():
+#				 print(A.a)
+#			 # 和下面的语法等价
+# 			 def play(): 
+# 				  print(A.a) 
+# 			 play = staticmethod(play) 	# staticmethod()和classmethod()是两个builtin函数
+# 			   
+#			 @classmethod
+#			 def fun(cls,x,y):
+#		 		 print(cls,x+y)
+#			 # 和下面的语法等价
+#			 def fun(cls,x,y): 
+# 				 print(cls,x+y) 
+#			 fun = classmethod(fun)    
+#		
+#		 a = A(1,2)	#out: 3 hello
+#		 a.play()	#out: 100	# 如果没有装饰器,则此调用是会出错的,因为play()定义中是没有参数的
+#		 A.play()	#out: 100
+#		 a.fun(10,20)	#out: <class '__main__.A'> 30
+#		 A.fun(10,20)	#out: <class '__main__.A'> 30
+#=========================================================================
+#        class C(object):
+#            def getx(self): return self._x
+#            def setx(self, value): self._x = value
+#            def delx(self): del self._x
+#            x = property(getx, setx, delx, "I'm the 'x' property.")
+#        <=>
+#        class C(object):
+#            @property
+#            def x(self):
+#                "I am the 'x' property."
+#                return self._x
+#            @x.setter
+#            def x(self, value):
+#                self._x = value
+#            @x.deleter
+#            def x(self):
+#                del self._x
+#       ps: 需要注意的是,@property下的函数必须是get函数,因为property()的第一个参数是fget=None,也就是说将下面的
+#           的函数作为第一个参数fget传递的,而后几个参数用的默认值None
+#       ps: x.setter(x)必须返回一个property对象,而不是一个函数,以保证x一直都是一个property对象
+#
+#   07 继承: 如果两个类之间的关系是 IS ,则它们应该用继承来关联,python中继承的语法是,在类名后面跟一个小括号,
+#            然后写上父类用逗号分隔,在构造器内需要显示调用父类的构造器,否则父类的属性将没法被继承过来
+#
+#       (1) python中有两种类:经典类和新式类,python3只支持新式类,python2.x(>=2.2)支持两种类.新式类是直接或者间接继承
+#           了object的类,经典类则是没有继承object的类,在python3中,class A <=> class A(object),在python2中,这两者
+#           是不等价的,并且这恰好是区分经典类和新式类的依据,前者是经典类,后者是新式类.经典类和新式类还有一个很大
+#           的区别,就是经典类中的mro用的会深度优先+基类顺序,而新式类用的是C3算法.需要注意的是,python2中,如果一个类
+#           的祖先既有新式类又有经典类,则它自身是一个新式类.新式类查看mro列表,可以是A.__mro__或者是A.mro(),只能用类
+#           名A不能用实例A(),经典类查看mro列表,需要导入模块:import inspect as it,然后调用it.getmro(A).
+#       
+#       (2) 在新式类的构造器中,要调用父类的构造器可以用经典类中用的形式,也可以用新式类独有的super()方法,但是推荐使用
+#           super()方法,因为它能保证每个类只初始化一次,而经典类中如果出现菱形继承结构,则同一个类可能被初始化两次,需要
+#           注意的是,如果使用super(),则每一个类的构造器中都需要用写super().__init__().
+#           经典类方式:                     新式类方式:
+#           class B(A):                     class B(A):
+#               def __init__(self):             def __init__(self, b, **kargs):
+#                   A.__init__(self)                super(B,self).__init__(**kargs)
+#           关于类的初始化的更详细的知识,见/home/caixiong/python/codes/inherit.ipynb
+#
+#       (3) super其实是一个类(代理类),它的作用可以等价的认为是返回mro列表中的下一个类,如语句super(A,self).play(x,y)
+#           等价于mro=self.__class__.__mro; cls=mro[mro.index(A)+1]; cls.play(self,x,y). 但是super的实现比这个要复杂
+#           很多,它涉及到__getattr__方法的重写,以及偏函数的使用,还有一些其他的技术,简易版的super的实现也在上面说的的
+#           notebook中.就是不要认为super()返回的是父类,它是近似认为是返回mro列表的下一个类
+#
+#       (4) 求解mro的算法: 经典类的深度优先+基类顺序,新式类的C3算法(python2.2中新式类不是C3算法,2.3开始才是C3算法)
+#           经典类的mro算法: 这个算法是不好的,它不满足父类永远在子类之后,且可能改变线性单调性(新增的类的mro顺序中,并
+#               没有维持原来的类的mro的相对顺序),所以最好是不要用经典类.
+#           新式类的C3算法: L[object] = object; L[C] = C+merge(L[B1],L[B2],..,L[BN],[B1,B2,..,BN]),其中C是要求的类,
+#               B1,B2,..,BN是C的父类(按照定义时的书写顺序排列, 即class C(B1,..,BN):pass).merge是对这N+1个列表进行合
+#               并和输出操作,从左往右找到第一个列表,满足它的头元素在所有列表(如果在这个列表中的话)的头部,则输出这个
+#               头元素,并在所有列表中删除该元素,如此重复下去,如果列表均为空,则成功,否则发生了冲突,解释器将抛出异常
+#           例子: class X:pass; class Y:pass; class A:(X,Y):pass; class B(Y,X):pass; class C(A,B):pass 
+#               L[C] = C + merge(AXYO, BYXO, AB)
+#                    = C + A + merge(XYO, BYXO, B)
+#                    = C + A + B + merge(XYO, YXO)
+#               这是一个有冲突的例子.对于C3算法,有时候可以根据拓扑排序+深度优先+基类顺序简单的确定,但是不一定可靠,
+#               几个特例:全部是单继承的话,mro表就是子孙->祖先的顺序,菱形结构则是广度优先.
+#           ps: 对于这种多继承,最好是画继承图,最子类放在最下面,然后往上按顺序从左至右放父类,并给每个父类一个有向边
+#               指向它(可以简画成无向边),同样的方法依次画出第二层各个父类的父类的图,直至到object
+#
+#       (5) python中没有重载,多态等复杂语法,所以如果一个实例调用某个方法时,解释器的处理很简单,就是根据mro列表去搜索
+#           找到第一个同名的方法后便调用之,这里如果参数不匹配则会直接抛出异常的,而不会去检查mro列表中的其他成员是否
+#           有符合参数调用的方法.
+#
+#   08 魔术方法: 类方法中以双下划线开头并结尾的方法被称为魔术方法,这些方法如果定义了的话,会被解释器在一些场合下自
+#                动调用,有很大一部分是对运算符的重载,如__eq__ ==, __add__ +, __imul__ *=, 还有用于容器,上下文,类型
+#                转换,属性相关的.
+#      ps: 魔方方法名和相应的操作是绑定的,只要相应事件发生并且该方法被定义了,则就会调用,即使方法参数不对,也会调用,只是如果
+#          参数定义错误的话,调用后会抛出异常
+#
+#      __new__(cls,other)   # 这是构造实例时最先调用的函数,实参是解释器自动传递的,分别是类名和类名后的参数列表
+#                           # 如果此方法没有返回对象,则__init__()不会被调用,如果返回了,则只将上述参数中的类名
+#                           # 替换成返回的实例对象,其余参数不变,继续调用__init__()方法,所以__new__和__init__形参
+#                           # 个数必须一样.所以实际定义__new__()时,用的是万能参数,即__new__(*args, **kargs),这也是
+#                           # 为什么当构造实例的调用语句参数和构造器不一致时,总是报出构造器参数传递错误,而不是__new__()
+#                           # 参数错误.另外需要注意的是,类名1.__new__(类名2),如果类名1是在builtin中的,且类名2不是类名1
+#                           # 的子类时会抛出异常
+#
+#                           # 自定义__new__(): def __new__(*args,**kargs) 自定义代码; return object.__new__(args[0])
+#                           # 因为即使是调用父类的__new__,最终也是会调用到object.__new__,所以不如直接用object调用__new__
+#                           # object的__new__接受待构造类的类名作为唯一的参数
+#                           # __new__方法,只是在o = A(parms)时调用一次,即使是o是子类,它的多个父类的__new__也不会隐式被调用
+#                           # 除非是显示的调用,但是显示调用没有意义,因为最终就是一个对象即可,不需要它的父类也去构建对象
+#      
+#      __init__(self,other) # 构造器,__new__()返回实例对象后,由解释器自动调用之,第一个参数是实例本身,other是对象定义语句
+#                           # 中的参数列表.需要注意的是,尤其是在多重继承之中,如果某个父类的__init__没有被显示调用,则这个
+#                           # 父类的实例属性是没法使用的,也就是父类中属性是否被继承,取决于父类的构造器是否被调用
+#
+#      __del__(self)        # 析构器,在回收对象时使用,一般是del o时会调用,但是如果o指向的对象还有其他指针指向时,则即使
+#                           # 用了del o 也不会将该对象析构掉,只是o这个指针不能用了.实际上,__del__()的调用是发生在对象
+#                           # 被回收的时候,如o指向一个对象的,然后给o赋一个新的值,那个无名对象会被回收,__del__会立即被调用
+#     
+#      __invert__(self)     # ~按位取反
+#      __getitem__(self)    # 索引操作
+#      __mod__(self, other) # %,对于int是取模,对于str是格式控制字符串,此时other是一个元组,这就解释了"x=%d y= %d"%(10,20)
+#      __getattr__(self,name) # 访问一个不存在的属性name时调用,注意,builtin的getattr(o,name,[default])不是调用o.__getattr__
+#                             # 此方法很有用,对于实现super()类很关键,它的返回值将替代原来的o.name继续完成后续操作,可以是函
+#                             # 数调用,如 o.bb(10,20),而bb是不存在的属性,如果__getattr__()返回一个函数f,则执行f(10,20)
+#      __setattr__(self, name, value) # 将属性name的值赋值为value时调用
+#      __delattr__(self, name) # 删除属性name时调用
+#   
+#25 文件读写:fobj = open("file/name", "mode")
+#   (1) mode= r     读文本文件
+#             rb    读二进制文件,3个read函数均可用
+#             r+    读和写
+#             rb+   读和写二进制文件
+#             w     写文本文件,无论文件是否存在,最终文件存储的内容只有刚才写入的数据
+#             wb    写二进制文件
+#             w+    写和读
+#             wb+   写和读二进制文件
+#             a     追加
+#             ab    追加二进制文件
+#             a+    追加和读
+#             ab+   追加和读二进制文件
+#
+#   (2) read([size])读取size个字节,size=-1或没写时,读取当前位置后的所有字节    
+#       readline()  读取一行,可以设置读取的最大字节数
+#       readlines() 读取所有行
+#       write(str)  写数据,可以是bytearray类型的
+#       tell()      返回文件指针的当前位置
+#       seek(offset,from) 移动指针的位置
+#       close()     关闭文件
+#       flush()     刷新内部缓冲区
+#       next(fobj)  返回文件对象fobj的下一行,因为fobj本身是一个迭代器
+#
+#
+
+#LAST:
+#01 字符串格式控制中,如果要表达'%'这个字符则需要写成%%进行转义
+#02 元组的元素可以是列表和字典,所以可以改变元组的列表元素中的元素值,但是不能让列表元素指向其他内存空间
+#03 函数名,类名其实也都是一个引用,是一个指向相应对象的引用,可以和正常变量引用一样使用
+#04 函数返回多个返回值的说法其实是不严谨的,因为用逗号隔开的多个返回值,实际上构成了一个元组,所以函数实际是返回了一个
+#   元组对象,也就是说函数的返回值仍然只有一个,并且只能是一个.
+
+# 易错点:
+## 01 包的相对和绝对导入方式
+# 包结构如下:
+pkgs
+├── __init__.py
+├── pkga
+│   ├── __init__.py
+│   ├── moda1.py
+│   ├── moda2.py
+│   ├── moda.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-36.pyc
+│   │   ├── moda1.cpython-36.pyc
+│   │   ├── moda2.cpython-36.pyc
+│   │   └── moda.cpython-36.pyc
+│   ├── subpkga1
+│   └── subpkga2
+├── pkgb
+│   ├── __init__.py
+│   ├── modb1.py
+│   ├── modb.py
+│   └── __pycache__
+│       ├── __init__.cpython-36.pyc
+│       ├── modb1.cpython-36.pyc
+│       └── modb.cpython-36.pyc
+├── pkgc
+│   ├── __init__.py
+│   ├── modc.py
+│   └── __pycache__
+│       ├── __init__.cpython-36.pyc
+│       └── modc.cpython-36.pyc
+└── __pycache__
+    └── __init__.cpython-36.pyc
+
+#coding: utf-8
+print("enter pkgs/pkga/moda")
+# 导入同一个包中的多个模块和子包的
+from . import moda1
+#import moda2       # 此句说找不到moda2
+from .moda2 import fun
+#from moda2 import fun  # 此句说找不到moda2,如果执行python pkgs/pkga/moda.py则是可以的
+
+#import .moda3      # 此句语法错误,说明'.','..'等只能用于from之后,不用用于import之后
+#import subpkga1    # 此句说找不到subpkga1
+from . import subpkga1
+from . import subpkga2
+
+# 导入上层包中的子包以及子包中的模块
+from ..pkgb import modb
+from .. import pkgc
+
+# 上面用了.或者..的都是相对方式导入资源,下面的语句是用绝对方式导入
+# 绝对方式导入包结构中的其他资源,绝对方式导入时,必须以顶级包名打头,
+# 此处因为执行python -m pkgs/pkga/moda,所以pkgs是顶级包名
+from pkgs.pkgb import modb1     # 合法
+#from pkgc import modc          # 不合法,找不到pkgc,在pkgc前加入..则可以
+from ..pkgc import modc
+
+moda1.fun()
+#moda2.fun()
+fun()
+modb.fun()
+modb1.fun()
+modc.fun()
+print(__name__)
+print("leave pkgs/pkga/moda")
+
+#out:
+'''python -m pkgs.pkga.moda的输出如下:
+enter pkgs/pkga/moda
+in pkgs/pkga/moda1/fun
+in pkgs/pkga/moda2/fun
+in pkgs/pkgb/modb/fun
+in pkgs/pkgb/modb1/fun
+in pkgs/pkgc/modc/fun
+__main__
+leave pkgs/pkga/moda
+'''
+# ps: 如果执行python -m pkga/moda,则from ..的语句均会报错,因为它们超出了顶级包目录(此处为pkga)
+
+# 上述代码如果用python pkgs/pkga/moda.py运行,则报错,说不能导入moda1,因为此时没有包的层级结构,从
+# 而不能用相对导入方式,但是此时import moda2 又是合法的(moda2相当于是独立的模块,与包结构无关),因
+# 为此时解释器会在当前目录下查找moda2,正好能找到
+
+## 02 numpy多维数组索引
+# 索引某个轴的全部元素
+arr = np.arange(24)
+arr.shape = 2,3,4           # 三维数组,三个轴,轴编号从左至右递增,从0开始,此处0,1,2轴的维度分别是2,3,4
+arr[i,j,k] == arr[i][j][k]  # 索引单个元素时,这两种方式等价
+arr[:, j, k]    # 固定j,k时第0维的全部元素
+arr[:][j][k]    # 此句和arr[j][k]结果一样,并不是像上面一样索引第0维的所有元素,这是因为arr[:] 就是等于arr的
+arr[0:10:2, ::2, 2::3] # 切片,需要注意的是,numpy切片不同于列表切片,修改numpy切片,会改变原数组,而list不会
+# ps: arr[:, 0, :]的结果是一个二维数组,并不是一个三维数组
+
+# __getitem__()的参数类型问题
+# __getitem__()方法是索引操作符[]对应的魔方方法,它的参数可以是普通tuple类型,list类型,slice tuple类型
+arr[(0,0,0)] == arr[0,0,0]  # 此两者的参数类型相同,均为tuple,值也相同,为(0,0,0)
+arr[[0,2,2]]      # 取arr第0维的0,2,2号元素,并且2号重复了一次,此时参数类型是list类型,list提供需要返回的
+    # 的数组第0维的下标,此种方式返回的内容是copy的,即修改内容后,原数组不变
+arr[0:1:2, ::2, 2::3]       # 此种方式的参数类型是slice tuple,这是因为解释器在遇到[]和:时,将[]内的:解释
+    # 解释为切片(这也是切片符:只能用于[]内的原因),此时自动生成slice对象,此处一共是3个slice对象,每个slice
+    # 对象有三个属性:start,end,step,形式为start:end:step,如果用::(等价于:),则这三个参数都是None,此时slice
+    # 索引的是0:len:1
+# 此外,上面三种方式:切片,int数,list可以混用的,最后都是形成一个tuple,如arr[0,:,[1,2]],但是效果和arr[0,:,1:3]
+# 不相同,前者结果是[[1,5,9], [2,6,10]],后者是[[1,2],[5,6],[9,10]],两者恰好是转置的关系,最好不要用前一种混合
+
+# 总结:
+# numpy数组索引非最高维的全部元素时,只能用[i,:,j]的方式,不能用[i][:][j],并且即使是索引最大轴的全部
+# 元素时,也不是[i][j][:],用[i][j]就可以了,也就是说[:]是多余的
+# 解释器对__getitem__()函数的调用做了处理,使得传参(a1,a2,a3)和a1,a2,a3效果是一样的,最终都是同一封装
+# 成一个tuple对象,并且对于切片参数':',解释器自动生成slice对象
+
+# 二维列表推导式
+L = [[y for y in x] for x in arr[0]]    # 将arr[0]变为二维列表
+L[:, 0] # 获取第0列,此句非法,list索引不支持参数为元组,只能是单个int或者slice对象
+    # 这就是说二维列表是无法通过切片直接取某一列的,只能用推导式
+L_0 = [x[0] for x in L] # 获取第0列
+# 下面的代码可以验证__getitem__()传参时的特殊性
+class arr: 
+    def __init__(self, x): 
+        self.x = x 
+    def __getitem__(self,idx): 
+        print("in ___getitem__!")
+        print(idx, type(idx)) 
+        return self.x[idx] 
+    def fun(self, ii): 
+        print(ii) 
+
+## 03 参数列表中的'/'
+# 查看help()时,经常出现参数列表中有'/',其实这个'/'不代表任何参数,它指示前面的都是位置参数,不能有关键字参数
+# 例子:readlines是文件对象的一个方法,用help查看时,出现下面的函数头描述
+readlines(hints=-1, /)  
+readlines(10)       # 调用正确
+readlines(hints=10) # 抛出异常"TypeError: readlines() takes no keyword argument"
+# ps: 这种语法只在python c中可以使用,python中并无此语法
+# 上面的例子说明,在'/'之前有几个参数,则调用时它们必须用位置参数传递,而不能使用关键字参数
+
+## 04 '*'的使用
+# '*'后面可以跟一个迭代器对象,表示将该迭代器的元素'解压'出来
+# 例如a = [1,3], b = [100, *a] = [100, 1, 3],这可能也是*l做为位置参数传递的原因
+# *itor_obj这个表达式只能放在[],()元祖或函数,{}集合内,不能放在其他地方
+# ps: *dict_obj则结果是由dict_obj的所有keys,这说明其实*操作就是一个遍历它后面的迭代器
+#   并且把得到的所有元素,改成一个一个的单个元素形式.
+#
+# 类似的,**表示"解压字典",但是它后面必须跟一个字典对象(mapping),并且只能放在()函数或{}集合内

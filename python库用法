@@ -1,0 +1,636 @@
+##01 argparse模块
+#   描述: 用于解析命令行参数的一个标准库
+#   用法: 
+#       import argparse
+#       parser = argparse.ArgumentParser()  # 获得一个参数解析器
+#       parser.add_argument()   # 添加需要解析的参数,调用一次添加一个
+#       args = parser.parse_args()  # 对参数进行解析,返回一个Namespace对象,其属性为解析好的参数
+#
+#   (1) ArgumentParser,是一个类,可以通过构造器添加一些辅助信息,最常用的是description关键字参数
+#       它用于添加这个程序的描述信息,在使用-h选项时可以显示出来
+#
+#   (2) add_argument()
+#       def add_argument(self, *args, **kwargs):
+#       """
+#       # 命令行位置参数
+#       add_argument(dest, name=value, ...)    # 只能有一个位置参数(作为dest),其余为关键字参数
+#       # 命令行可选参数
+#       add_argument(option_string, option_string, ..., name=value, ...)    # 可有多个option_string
+#       """
+#       argparse模块将参数分为两类:位置参数positional,可选参数optional
+#       可选参数:以-或者--开头(也可以很多个-),并且可以有多个别名,命令行传递参数时用任何一个别名
+#           都可以,如add_argument('--verbose','-v','--abc',dest='filedname'),此句添加一个待解析
+#           参数,命令行中对于选项是--verbose,-v,--abc的参数,均解析为同一个参数,在程序中使用时,则
+#           是以filedname作为属性名的(如args.filedname),如果没显示指明dest,且别名中只有以-,--开
+#           头的参数,则属性名一般为第一个以--开头的参数去掉前缀--,如verbose
+#           ps: 如果没有dest参数, 则程序中使用该参数是通过第一个option_string来使用的
+#       位置参数:不能以-或者--开头,并且不能有别名,即只能有一个位置参数,如add_argument('filedname')
+#           位置参数在命令行中必须有值,按照位置参数和添加时顺序把命令行中的参数赋值给位置参数,而
+#           可选参数则在命令行中可有也可以没有
+#       add_argument()中还有一些其他的关键字参数:
+#       nargs=1 # 指定该参数需要的值的个数,默认为1,此值必须>0,除非关键字参数action不是'store'
+#       dest='fieldname' # 位置参数不能有此字段,可选参数才能有,且作为在程序中使用该参数的属性名
+#       action='store' # 默认是store,即存储参数的值,可以是'store_true':出现则置True,'store_const':
+#                      # 出现则置为const,此时需要加上const=x,'append':多次出现该参数时,将多次的
+#                      # 值保存为一个列表,'count':计算该参数出现的次数
+#       default=val    # 给出该参数的默认值,即命令行没有给出值时使用该值
+#       此外,还有type用于指定类型,help用于给出简短的参数描述,required=True用于指定可选参数必须有
+#       如果type没有指定的话,默认是str类型
+#       ps: 位置参数中, add_argument()的第一个参数, 必须是位置参数, 且只能有一个位置参数, 并且作为dest的名字
+#           可选参数中, add_argument()可以有多个位置参数作为option_string
+#
+#   (3) parse_args(): 此函数用于解析参数,此函数如果没有传参,则解析命令行参数,如果传入一个字符串列表
+#       则可以解析该字符串列表,后者可以用于测试,
+#       ps: 解析命令行参数的函数不一定是main, 可以是任意函数, 因为无论在哪个函数里, parse_args()函数没有
+#           传参数时, 都是使用os模块的命令行参数
+#   ps: parse_known_args()函数, 用于解析命令行中给出但是在parser中没有add_argument()的参数, 此函数会返回一个
+#       元组, 第一个元素和parse_args()的结果一样, 第二个元素则是命令行中没有被准确解析的剩余参数字符串
+#
+#   例子:myparse.py
+        import argparse
+        def main():
+            parser = argparse.ArgumentParser(description="in myparse.py")
+            parser.add_argument("one", nargs=1, help='the first arg need two')
+            parser.add_argument("-t", "--two", "--tt", dest='two', help="the second arg need one")
+            parser.add_argument("--three", action='store_true', help="the third arg need zero")
+            parser.add_argument("four", nargs=2, help='the fourth arg need two')
+
+            # 此方法可以传入一个参数列表可以模拟命令行传参,用于测试,例如:
+            # ['--a=10', '--b=20'],此种方式在写可选参数时,必须写成name=val形式,不能用空格代替等号
+            args = parser.parse_args() 
+            print(args.one, args.two, args.three, args.four, sep='\n')
+
+        main()
+        python myparse.py 100 -t 99  --three 200 300 # ['100'] 99 True ['200', '300']
+        python myparse.py 100 200 -t 99  --three 300 # 报错,four的两个参数必须放在一起
+        python myparse.py -t 99 100 200 300          # ['100'] 99 False ['200', '300']
+        python myparse.py 100 --three 200 300 -t 99  # ['100'] 99 True ['200', '300']
+#   ps: 帮助信息中显示的如:-one ONE ONE,后两个ONE是指该参数需要两个值,故用ONE ONE表示
+#   ps: 命令行写可选参数时,也可用等号,如 --mode='eval', --mode=eval(可不加引号,因为type默认为str)
+#   ps: 如果传入了没有用add_argument()添加的参数,则会报错
+
+
+##02 numpy模块
+#   (1) numpy中的广播机制,numpy中的两个数组,进行广播时,先按照尾维度对齐,然后从右至左比较两个数组的
+#       维度,只有当两个的维度相同或者其中一个是1时才合法,对于后者会发生广播操作,维度为1的会被广播为
+#       维度大于1的那个维度值,也就是说对于一个合法的广播,最终的结果是两个数组各个维度的最大值,并且
+#       需要注意的是,两个数组的维数可以不相同,此时也是同样广播的
+#
+#   例子:
+#       A      (4d array):  8 x 1 x 6 x 1
+#		B      (3d array):      7 x 1 x 5
+#		Result (4d array):  8 x 7 x 6 x 5
+#		
+#		A      (2d array):  5 x 4
+#		B      (1d array):      1	# B其实是标量
+#		Result (2d array):  5 x 4		
+
+		a = np.array([1,2,3,4])        
+		b = np.array([[10],[20],[30]]) 
+		a+b = 
+		array([[11, 12, 13, 14],
+       		  [21, 22, 23, 24],
+       		  [31, 32, 33, 34]])
+
+# 	ps: 广播只发生在同维度的操作中,对于矩阵乘法是不成立的,矩阵对应元素*,+,-等均可以
+#   ps: 要尽量少用rank为1的向量:(n,),此向量既不是行也不是列向量,应该明确维度是(n,1)
+#       或者是(1,n),在广播时,(n,)是当作行向量(1,n)来处理的
+# 
+#   (2) np.any(), np.all()
+#       np.any(
+#           a,          # 需要判断的数组
+#           axis=None,  # 坐标轴,None是检测整个数组,也可以是int数组,用于检测哥哥维度
+#           out=None)   # out用于存放返回的结果,out必须和返回值形状相同,返回值的类型由out的类型决定
+#       any()和all参数一样的,any()用于测试指定轴是否存在一个为True,all则是测试指定轴是否都为True,
+#       两者的关系类似于or和and,只是此处是用于多个值的测试.
+#   例子:
+        np.all([[1,0, 0],[0, 0, 1]], axis=0) # array([False, False, False])
+        np.any([[1,0, 0],[0, 0, 1]], axis=0) # array([ True, False,  True])
+        a = np.zeros(3, dtype=np.float32)
+
+        a = np.zeros(3, dtype=np.float32)
+        np.any([[1,0, 0],[0, 0, 1]], axis=0, out=a)
+        a   # array([1., 0., 1.], dtype=float32)
+        a = np.zeros(3, dtype=np.bool)
+        np.any([[1,0, 0],[0, 0, 1]], axis=0, out=a)
+        a   # array([ True, False,  True])
+#   ps: 所以out的作用就是指定返回值的每个轴的数据类型,它的值没什么用,out中的值数据类型不一致时
+#       最终的数据类型是最大的那个,如[0, 0.], 会变成浮点,[0, False]会变成int
+#   ps: out必须是ndarray类型,不能是列表
+
+#   (3) np.around() np.round(), 两个函数用法一样的, 用于舍入
+#       around(
+#           a,          # 需要四舍五入的数组
+#           decimals=0, # int, 用于指定是在哪一位进行舍入, >0时往小数点右边数, <0时往左边数
+#           out)       # 用于存放输出的数组, 必须和a的shape相同, 类型可以不同, 只要能cast即可
+#   ps: 准确来说, 是4舍6入, 如果是5则需要看情况, 会round到最近的偶数, 如round(1.5)=2, round(0.5)=0
+#       需要注意的是, 这个向偶数靠拢, 是指使得decimals这一位为偶数, 而不是指整个结果为偶数
+#   ps: 是对decimals的下一位进行4舍6入5到偶, 最终的保留的的位是decimals
+#   例子:
+        np.around([0.37, 1.64], decimals=1)  # out: array[0., 1.6]
+        np.around([0.5, 1.5, 2.5, 3.5, 4.5]) # out: array[0., 2., 2., 4., 4.]
+        np.around([1, 95, 11], decimals=-1)  # out: array[0, 100, 10]
+        np.around([5, 15, 25, 35], decimals=-1) # out: array[0, 20, 20, 40], 这里向十位数上的偶数靠拢
+
+#   (4) np.linspace()  # 给定区间, 生成区间内等距离的N个点
+#       linspace(
+#           start,      # 区间起点, 可以是一个数组
+#           stop,       # 区间终点, 可以是一个数组
+#           num=50,     # 生成的点数N
+#           endpoint=True,  # 右端点是否作为第N个点
+#           retstep=False,  # 是否返回step
+#           dtype=None,     # 数据类型, 从其他参数中推到出
+#           axis=0)         # 指定生成的序列为哪个轴, 只有start,stop是数组时才有用
+#   ps: start和stop形状必须相同, 或者可以广播, 否则报错
+#   ps: 如果start是n-D数组, 则axis的范围是[0, n], 因为生成序列后, 会增加一维, axis用于指定增加的维是哪一维
+#   ps: 如果endpoint为True, 则间隔为(stop-start)/(num-1), 否则是(stop-start)/num, 这就是说endpoint为True
+#       时, 产生的是[start, stop], 而False时, 则是[start, stop)
+#   ps: 如果是浮点数, 则默认是float64, 需要整数时要指定dtype为int
+#   ps: 这个函数和range()比较像, range是知道区间和间隔, linspace是知道区间和点数
+#   例子:
+        np.linspace(2.0, 3.0, num=5)  # array([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ])
+        np.linspace(2.0, 3.0, num=5, endpoint=False)  # array([ 2. ,  2.2,  2.4,  2.6,  2.8])
+        np.linspace(2.0, 3.0, num=5, retstep=True)    #(array([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ]), 0.25)
+        a = np.linspace([0, 0], [10, 10], num=6)   # 即使是整数点, 也被转换成float64了
+        array([[ 0.,  0.],
+               [ 2.,  2.],
+               [ 4.,  4.],
+               [ 6.,  6.],
+               [ 8.,  8.],
+               [10., 10.]])
+        a = np.linspace([0, 0], [10, 10], num=6, dtype=np.int32)  # 指定为int32
+        array([[ 0,  0],
+               [ 2,  2],
+               [ 4,  4],
+               [ 6,  6],
+               [ 8,  8],
+               [10, 10]], dtype=int32)
+        np.linspace([[0, 0, 0], [0, 0, 0]], 1,  num=10, endpoint=False, axis=2)  # 生成的序列在2轴上, 此时形状为(2, 3, 10)
+        array([[[0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                [0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                [0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]],
+
+               [[0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                [0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                [0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]])
+#   ps: 第一个例子的间隔为1/4=0.25, 而第二个例子是1/5=0.2, 所以如果既要stop端点, 也要均分成我们希望的间隔
+#       可以让num+1, 如: np.linspace(0, 2.0, 21)  # 间隔为0.2, 各个点为.0, .2, .4, ..., 2.
+
+#   (5) np.ravel(), np.flatten(), np.reshape(), a.T, np.resize()
+#   ravel(), reshape(), a.T这三个都是返回原数组的一个新的view, 其中ravel()是拉成一个1维的view, 而原数组的
+#       view是不变的, 但是需要注意的是, 如果改变新数组的某个元素, 则原数组的对应元素也会被修改
+#   flatten()也是将数组拉为一维的, 但是它返回一份新的内存空间, 也就是相当于ravel().copy()
+#   resize()直接修改原数组的形状, 它相当于是a=a.reshape(), 但是resize()不允许有负维度, 如resize(2, -1), reshape()则可以
+#   返回值: resize() None; ravel(), reshape(), a.T 新的view && 原数组内存空间; flatten()返回新的view && 新的内存空间
+#   
+#   ps: np.reshape(a, newshape, order="C"), 要求newshape必须是一个int or int tuple
+#       aa.reshape(shape, order="F"), 则shape可以是一个int or int tuple or 多个参数(a.reshape(-2, 3)=a.reshape((-2, 3)))
+#       order="C" "F" "A", 其中"A"是指数组原来的读取顺序, "C"是c语言的行优先, 是指last dim change fastest
+#       reshape的过程可以看成是先对数组进行ravel(拉直), 然后进行reshape
+#
+#
+#   (6) numpy索引
+#       01 ...可以用于代替x个连续的':', 例如 a[:, :, 3]=a[..., 3], a[0,:,:,2]=a[0,...,2], x是由a的维度以及本次给出的其他索引决定的
+#       02 整数型数组作为索引:
+#       a[i, j, k], 其中i,j,k为整数型数组, 此时要求i,j,k的shape一致(广播后一致), 然后每次从i,j,k中的对应位置处选一个数构成最终的
+#           完整索引元组, 返回的数组形状是和i,j,k广播后的形状是一样的
+#       a[:, j, :], 返回的数组形状是[a.shape[0], j.shape, a.shape[2]], 它的过程就是选定所有':'处的值, 此时就相当于是固定选定了j所
+#           在维度的所有值, 然后对这个些值用j的元素值去选择, 并且选完后的形状和j相同
+#       ps: 这两种形式的最一般化形式: 就是一个n维数组, 它的每个维度可以是切片索引或者数组索引, 这两种形式可以随意组合, 最终的数组
+#           维度就是由上面的公式确定的, 并且需要注意的是, 对于没有给出索引的维度, 相当于是给了':'索引
+#       ps: 令l=[i, j, k], 则a[l] <=> a[i, j, k], 此时列表l在传参时会被解压成三个参数传递给索引函数([], []其实是一个操作符重载函数),
+#           但是如果是l=np.array([i, j, k]), 则a[l] != a[i, j, k], 因为此时索引函数只有一个参数l, 相当于是a[l, :, :]
+#       ps: 利用此种索引对数组赋值时, 如果索引列表出现重复索引, 后出现的重复索引对应的值被保留, 也就是说是安装索引出现先后顺序进行
+#           赋值的, 对于重复索引的ufunc操作(+, -, *, /等), 要实现操作累计, 可以使用相应ufunc的at函数, 如a[b].add.at(10)
+#       ps: 整数数组索引也叫花哨索引, 一般是每个维度的索引传入一个数组(可以是多维的), 也可以用切片代替某个维度
+#
+#       03 bool数组作为索引: 
+#           bool数组作为索引和整数型索引的解释方式是不一样的, 一般来说, 它要求bool数组的shape和原数组shape一样, 这就是说bool数组中的元素
+#           的位置决定原数组中元素的位置, 然后其值True or False决定是否取该元素, 整数型数组索引则是索引数组的元素作为索引原数组的位置的,
+#           b = a > 5, a[b]则返回a中所有大于5的元素的值, 但是它返回一个一维数组, 而a[b] = 10, 则会让a中大于5的元素都变成10, 此时数组a变了
+#           a=np.arange(3, 4); b=np.array([False, True, True]); 则a[b, :]=a[b]=[[4,5,6,7], [8,9,10,11]], 此时相当于是对b进行广播的, 和上面不同
+#           的是, 此时返回的数组不是一个一维的, 而是和原始数组同维度的
+#       ps: 一维bool数组的长度必须和对应轴的长度相同
+#       ps: 好像不是广播, 目前还没有完全理解这个机制, 待续...
+# 
+#   ps: numpy一共有4种索引:简单索引a[0, 3], 切片索引a[1:5], bool掩码索引a[a > 3], 花哨索引a[[[1, 2], [3, 4]]], 此外可以是这4中的组合构成
+#       组合索引 
+#   ps: 切片索引返回的是view, 而其他的索引返回的是copy的数据
+#   
+#   (7) numpy线性代数
+#       转置: a.transpose(), a.T, 都是只返回一个view
+#       求逆: np.linalg.inv(a)
+#       行列式: np.linalg.det(a)
+#       单为阵: np.eye(5), 5*5单位阵
+#       矩阵乘法: np.dot(x, y), *是元素相乘
+#       迹: np.trace(a)
+#       解方程组: np.linalg.solve(a, y), 对ax=y, 求出x
+#       特征向量: np.linalg.eig(a)
+#
+#   (8) numpy文件存储
+#       数组以二进制格式保存: np.save("save_name.npy", arr), arr=np.load("save_name.npy")
+#           这是最常用的方式, 此种方式后缀一定会被置为nphy(如果后缀本身是npy则不变, 如果不是则会被numpy置为npy), 此种方式保存的数组可以
+#           读取出数组的数据类型和形状, 所以load时不需要指定任何信息就能恢复出原数组
+#       ps: 还有np.savez("name.npz", a, b, c), np.savez_compressed("name.npz", a, b, c)分别用于存多个数组到单个文件(压缩和不压缩)
+#           这些都是用np.load()读取的, 如: G=np.load("name.npz"), a,b,c=G.files, a=G[a], b=G[b], c=G[c]
+#       ps: 使用这两个函数一次存放多个数组时, 最好不要以位置参数传数组a b c, 而是a_name=a, b_name=b, c_name=c, 因为在load时, 不一定
+#           是按照arr_0, arr_1, arr_2(这是以位置参数传递数组时, np给数组的文件名)这样的顺序的, 这样就容易出问题
+#       数组以文本文件保存: np.savetxt("save_name.out", fmt="%3d", delimiter=","), np.loadtxt("save_name.out", delimiter=",")
+#           此种方式只能存储1D或2D的数组
+#       保存为二进制文件: a.tofile("save_name.bin"), a = np.fromfile("save_name.bin", dtype=np.int32)
+#           此种方式对后缀名没有要求, 但是fromfile()需要指定数据类型, 并且不能保存行列信息, 并且数组排列顺序无论是c还是fortran格式, 都统
+#           一以C语言格式输出, 所以读出来的是一维数组, 需要reshape
+#
+#   (9) np.random.choice(), 从一个数组或者list中选择若干个元素
+#       choice(
+#           a,              # 需要被选择元素的数组(只能是1维的), 也可以是int数, 此时就是从np.arange(a)中选择
+#           size=None,      # 需要选择的元素数, 可以是一个int或者是一个shape元组, 如(3, 4)
+#           replace=True,   # True时可以出现重复元素, False则选择不重复的(此时要求size小于数组元素数)
+#           p=None          # 每个元素被选择的概率, 必须和a具有相同的shape
+#       )
+#   ps: 由于限制了a为一维数组, 所以choice可能最好是用于选择索引, 即np.random.choice(100, 3, replace=False), 而不是直接选择数组元素
+#       np.random.choice(10, 3, replace=True)  <=> np.random.randint(0, 10, 3)   # 可能会有重复元素
+#       np.random.choice(10, 3, replace=False) <=> np.random.permutation(np.arange(10))[: 3]
+#
+#   (10) np.set_printoptions(), np.get_printoptions(), 用于设置和获取数组打印选项 
+#       set_printoptions(
+#           precision=None,     # int, 指定float的小数点位数, 默认是8
+#           threshold=None,     # int, 如果数组元素数超过此值时, 不会打印所有元素, 默认是1000
+#           edgeitems=None,     # int, summary显示模式下, 前后打印的元素个数, 默认是3
+#           supress=None,       # bool, 默认False, 如果为True, 则按指定的位数显示浮点数, 否则如果abs(x)<1e-4 or >1e3时, 会用科学计数法显示
+#           nanstr=None,        # str, 浮点数not-a-number的显示字符串, 默认是nan
+#           infstr,             # str, 浮点数infinity的显示字符串, 默认是inf
+#           sign,               # '-', '+', ' ', 默认是"-", 如果是"+", 则会打印正号
+#           floatmode=None,     # "fixed", "unique", "maxprec"(默认), "maxprec_equal", 分别是打印固定的小数位数, 打印最小的可区分的小数位数, 按实际情况打印
+#           **kwargs)
+#   ps: np.get_printoptions()没有参数, 返回一个options的字典
+#   ps: 设置数组不用科学计数法时, 用suppress=True
+#
+#   (11) np.repeat(), 按照一个指定的轴重复数组
+#       repeat(
+#           a,          # 要重复的原数组
+#           repeats,    # int或int 1-D数组, 规定由axis指定轴的各个维度重复的次数
+#           axis=None)  # int, 指定要重复的坐标轴, 默认是将数组flatten, 返回flatten的数组
+#   ps: repeats要么是单个int, 要么是长度和axis指定的轴等长, 数值>=0, =0则是忽略该维度的元素
+#       如果axis是None, 则repeats必须和flatten后的数组长度一致(相等或单个int(广播))
+#   ps: 数组复制时, 是一个维度一个维度复制的, 而不是整体拼接式复制, 返回的数组base属性是None, 说明是占内存的
+#   例子:
+        a = np.arange(12).reshpae(2, 3, 2)
+        b = np.repeat(a, [0, 1, 2], axis=1)  #out: [[[2, 3], [4, 5], [4, 5]], [[8, 9], [10, 11], [10, 11]]] 
+        b = np.repeat(a, [0, 1, 2], axis=0)  #out: 报错, 因为0坐标轴的长度是2, 但是传入了一个长度为3的repeats
+        b = np.repeat(a, 2)  #out: [0, 0, 1, 1, ..., 10, 10, 11, 11]
+
+##03 atexit模块
+# 此模块只有一个函数就是register函数,用于注册回调函数,即程序退出时会
+# 调用这些注册过的回调函数
+
+# 用atexit.register注册的退出函数,是必须在整个程序退出的时候才执行的
+# 并且程序退出时执行这些函数的顺序和注册它们顺序相反,而注册顺序则是
+# register函数的执行顺序
+import atexit
+@atexit.register
+def exit_fun1():
+    print("in exit_fun1")
+def exit_fun2():
+    print("in exit_fun2")
+atexit.register(exit_fun2)
+def exit_fun3():
+    print("in exit_fun3")
+def exit_fun4():
+    print("in exit_fun4")
+    atexit.register(exit_fun3)
+    #atexit.register(exit_fun2)
+def main(argv=None):
+    print("enter in main")
+    exit_fun4()     # 注释掉此行后,exit_fun2,3不输出,因为它们没有被执行
+    print("leave in main")
+
+if __name__ == "__main__":
+    main()
+    print("end main")
+'''out:
+enter in main
+in exit_fun4
+leave in main
+end main
+in exit_fun3)
+
+in exit_fun2
+in exit_fun1
+'''
+# 因为模块被导入的时候,第12和17行是会被执行的,所以注册的顺序为fun1,fun2,fun3
+# 从而退出顺序与之恰好相反
+# 
+# ps: 此模块对于关闭文件很有用, 把关闭文件的函数注册成回调函数, 可以使得程序关闭文件更加方便
+# ps: 即使程序是抛出异常后退出的, 回调函数也会被执行
+
+
+##04 matplot.pyplot模块
+#   (1) plt.plot(), 这个函数是画折线图的, 可接受任意个参数
+#        plot(*args, scalex=True, data=None, **kwargs)  
+#   scalex, data也是关键字参数, scalex之前的都是位置参数(不能用关键字传参的)
+#   用法:
+        plot([x], y, [fmt], **kwargs)  # [x]是指x可有可无,[]不是列表符号, x, y, fmt必须是位置参数, 靠*args接受的
+        plot([x], y, [fmt], [x2], y2, [fmt], .., **kwargs) # [x], y, [fmt]可以看成是一个组合, 这个组合可以重复, 即重复画多组数据
+#   说明:
+#   01 x可以不给出, 此时x=[0, N), N是y的长度, x和y也可以是二维数组, 此时x和y的每一列会被当成一组数据, 此时x不要求每一列
+#       都是一样的, 也就是说多组数据的横坐标可以不相同
+#   02 fmt是一个字符串, 格式为[color][marker][line],每个选项都是一个字符表示, color是颜色, marker是各点的形状, line是线的形状 
+#       color:r, g, b, c(cyan 蓝绿), m(magenta,紫=红蓝), y(yellow,黄=红绿), k(balck), w(white), 如果选项字符串只有颜色一个选项, 
+#           则颜色还可以是: 'green', '#00ff00'这种格式
+#       marker:'.'实心点, ','像素点, 'o'实心圆, '^' 'v' '<' '>'上下左右三角符, 's'正方形, '*'星号, 'x'x符, '+'加号, 'D'菱形符
+#           'p'正五边形, 'h'正六边形, d'菱形符, .., 如果marker没有给出, 则没有marker, 这是默认的模式
+#       line: '-'实线, '--'虚线, '-.'虚点线, ':'点画线, 如果line没有给出, 则画的是散点图, 没有连线
+#    03 常用关键字参数:
+#       alpha: float, 透明度
+#       color: str, 颜色
+#       linewidth: float, 线的宽度, linestyle, 线的格式
+#       marker: str, 点的形状, markersize: marker大小
+#       label: 曲线的标签, 生成legend时需要用到 
+#       ps: 还有很多关键字参数, 不太会, 就没写了, 注意关键字参数的优先级大于fmt格式
+#   例子:
+        x = np.arange(10); y = [x**2 for x in range(10)]
+        plt.plot(x, y, 'go-')  # 绿色, o为marker, 实线
+        plt.ylabel('y-axis')
+        plt.xlabel('x-axis')
+        plt.axis([0, 10, 0, 100])  # 设置坐标轴范围, [xmin, xmax, ymin, ymax], 双闭区间
+        plt.show()
+
+        t = np.arange(0., 5., 0.2)
+        plt.plot(t, t, 'r--', t, t**2, 'bs', t, t**3, 'g^')
+        plt.show()
+
+#   (2) plt.scatter(), 这个函数是画散点图的, 接受指定数目的参数
+#       scatter(
+#           x,   # x坐标序列, shape=(n,)
+#           y,   # y坐标序列, shape=(n,), x和y长度必须相等
+#           s=None,  # 点的大小, float>0, shape=scaler or (n,), s的长度可以小于x, 此时会循环重复s 
+#           c=None,  # 颜色, 可以是一个格式字符串, 格式元组, 或者是有前两个格式构成的序列(序列中两种格式可混合)
+#                    # 或者是一个浮点序列,用于颜色深浅的映射, 序列长度必须和x的长度相同
+#           marker=None,  # 和plot中的marker一样
+#           cmap=None,    # 指定映射的颜色, 如plt.cm.Blues, plt.cm.Reds
+#           norm=None,    # 对颜色浮点序列进行规范化, norm必须是matplotlib.colors.Normalize的实例, 不太会用
+#           vmin=None, vmax=None, # 如果norm为None, 则这两个参数用于限定颜色规范化的标准范围
+#           alpha=None,   # 透明度, 0.是透明, 1.是完全不透明
+#           linewidths=None, # marker的边缘线的宽度, shape和s的要求是一样的
+#           verts=None,   # 不知道是什么
+#           edgecolors=None,  # 指定边缘的颜色, None是没有边缘, face保持和face color一样, 也可以是一个和c一样的参数
+#           *, 
+#           data=None,    # obj对象, 一般是字典, key是字符串, value是参数的值, 使用时需要将各个参数='key'
+#           **kwargs)
+#   ps: 颜色格式: 可以是和plot中的一样('r', 'red', '#ff0000'), 也可以是一个元祖(1., 0., 0.)
+#   例子:
+        x = np.arange(20); y = x**2
+        plt.scatter(x, y, s=y[:5], marker='s', c=['#ff0000', '#00ff00', [0, 0, 0], 'k']*5)
+
+        c = np.abs(np.random.randn(20))*10
+        plt.scatter(x, y, c=c, vmin=0, vmax=50, cmap=plt.cm.Reds) # 使用颜色映射, 此时由于c在[0, 10]之间, vmax=50,会导致颜色都很淡
+
+#   使用data对象
+        data = {'a': np.arange(50),
+                'c': np.random.randint(0, 50, 50),  # 用于设定颜色映射的值, 此时也可以不选定cmap参数
+                'd': np.random.randn(50)}
+        data['b'] = data['a'] + 10 * np.random.randn(50)  
+        data['d'] = np.abs(data['d']) * 100  # 用于设定点的大小
+        plt.scatter('a', 'b', c='c', s='d', data=data)
+        plt.xlabel('y-axis')
+        plt.ylabel('x-axis')
+
+#   (3) plt.subplots()
+#       subplots(
+#           nrows=1,    # 行数, 子图网格的行数
+#           ncols=1,    # 列数, 子图网格的列数
+#           sharex=False,   # 各个子图是否共享x轴, True则只有最下面的子图的x轴保留, 其余的共享
+#           sharey=False,   # 是否共享ｙ轴, 共享则只有最左边的子图有y轴, 这两个参数还可以是(none, all, row, col)
+#           squeeze=True,   # 如果行或者列是1 && squeeze=True, 则返回的axex是1-D数组, 只有N>1 && M>时, axes才是2维数组
+#           subplot_kw=None,  # 调用每个matplotlib.figure.Figure.add_subplot()时的参数, 以字典格式传入
+#           gridspec_kw=None, # 调用每个matplotlib.gridspec.GridSpec()构造器时的参数, 字典格式
+#           **fig_kw)   # 剩余的关键字参数, 均作为plt.figure()函数的参数
+#   返回值是一个figure.Figure实例和axes.Axes实例数组
+#   例子:
+        x = np.linspace(0, 2*np.pi, 400)
+        y = np.sin(x**2)
+        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+        ax1.plot(x, y)
+        ax1.set_title('Sharing Y axis')
+        ax2.scatter(x, y)
+        ax2.set_xlabel("x-axis2")
+
+    # 创建一个3*3窗口, 然后删除右下角两个, 在添加一个在此处(将两个合并成一个)
+    fig, axs = plt.subplots(ncols=3, nrows=3)
+    gs = axs[1, 2].get_gridspec()  # 此句主要是为了获得当前的GridSpec对象, axs[0, 0]也可以的
+    # remove the underlying axes
+    for ax in axs[1:, -1]:
+        ax.remove()
+    axbig = fig.add_subplot(gs[1:, -1])
+    axbig.annotate('Big Axes \nGridSpec[1:, -1]', (0.1, 0.5),
+                   xycoords='axes fraction', va='center')
+    fig.tight_layout()  # 此布局可以让各个坐标轴之间不会重叠(不然可能坐标轴标签会与另一个坐标轴有交叠)
+    # ps: fig对象有一个列表类型的属性:fig.axes, 是这些子图的列表, 内容和axs是一样的,只是axs是np数组
+
+
+##05 subprocess模块
+#   描述: 此模块用于创建子进程
+#
+#   (1) call()
+#       ss.call(
+#           *popenargs,     # 用于传递给Popen()的位置参数
+#           timeout=None,   # 超时设置, 父进程会等待timeout或者子进程结束运行
+#           **kwargs)       # 传递给Popen()的关键字参数
+#   例子:
+        ss.call(["ls", "-l"])
+        ss.call('ls -l', shell=True)
+#   shell默认为False, shell=False时 Popen调用os.execvp()执行args指定的程序, shell=True时 如果args是字符串, Popen直接调
+#       用系统的Shell来执行args指定的程序, 如果args是一个序列, 则args的第一项是定义程序命令字符串，其它项是调用系统Shell时
+#       的附加参数
+#   返回一个returncode, 为0说明执行成功, 否则失败
+# 
+#   check_call(*popenargs, **kwargs)  # 如果命令执行失败会抛出CalledProcessorError异常, 没有timeout参数, 其余同call
+#       并且其内部是调用call()的, 返回0
+#   check_output(*popenargs, timeout=None, **kwargs)  # 如果命令执行失败则抛出异常, 成功则返回子进程向标准输出的输出结
+#       果, 而不是返回returncode, 内部调用run()
+#
+#   ps: call(), check_call(), check_output()三个函数都是对Popen()的一个封装, 方便用户使用的, 他们都会自动等待子进程,
+#       并且对返回结果进行了简化, 只是返回returncode, 或者子进程输出到stdout的内容, 而Popen()则是最全面的子进程调用方法
+#       可已进行自定义的一些控制
+#
+#   (2) Popen类
+        ss.Popen(
+            args,       # strng or seq, 程序的参数, 如果是序列, 则第一个元素是要执行的命令
+            bufsize=-1, # 创建stdin/stdout/stderr pip file时传递给open()的buffer参数
+            executable=None,    # a replacement program to execute
+            stdin=None, stdout=None, stderr=None,  # 用于给子进程指定标准输入, 标准输出, 标准错误流
+            shell=False,        # 指定用shell来执行子进程
+            ...)
+#   ps: executable, 如果不是None, 则会替代args中的第一个元素, 如果args是一个字符串, 则相当于执行没有参数的executable
+#       如果executable是None, 则args的第一个元素作为命令, 此时如果shell=Fasle, 则它必须是一个可执行文件名, 不能是命令+参数
+#       的字符串模式, 如"cat" 可以, 但是"cat ./aa.txt"则不行(除非shell=True)
+#   例子:
+        # 执行ping命令, 输出到屏幕, 父进程等待子进程结束(p.wait(), 不调用pwait()则父进程是不等待子进程的) 
+        p = ss.Popen('ping -c4 www.baidu.com', shell=True);p.wait();print("hello")  # ping结束后才输出hello
+
+        # 重定向标准输出到ss.PIPE, 重定向stderr到标准输出
+        p = ss.Popen('ping -c4 www.baidu.com', shell=True, stdout=ss.PIPE, stderr=ss.STDOUT)
+        out, err = p.communicate()   # 读取子进程的标准输出和标准错误流, 也可以是p.stdout.read()
+
+        # 重定向标准输入为文件对象, 标准输出为管道
+        p = ss.Popen("cat", shell=True, stdin=open("hello.txt", "r"), stdout=ss.PIPE) 
+        p.stdout.read()  # 读取子进程的输出结果, 如果没有stdout=ss.PIPE, 则p.stdout是None的
+
+        # 重定向标准输出到文件对象
+        p = ss.Popen('ping -c4 www.baidu.com', shell=True, stdout=open("hello.txt", "w"))
+
+        # 重定向标准输入到另一个子进程的标准的标准输出
+        p1 = ss.Popen('cat /etc/passwd', shell=True, stdout=ss.PIPE)
+        p2 = ss.Popen('grep caixiong', stdin=p1.stdout, stdout=ss.PIPE)
+        p2.communicate()
+        # 可以看出来, ss.PIPE是一个保存子进程输出并且向其他子进程传递输入的缓冲区
+
+        # ps: 需要注意的是, communicate()方法会阻塞父进程, 直到子进程都完成
+
+#   (3) Popen()的其他操作
+#   p.poll()  # 检查子进程的状态, 返回0是执行成功, 返回None还没执行完
+#   p.kill()  # 终止子进程
+#   p.send_signal()   # 向子进程发送信号
+#   p.terminate()  # 同kill, 终止子进程
+#   p.pid     # 子进程的pid
+#
+#    ps: subprocess是用于创建子进程, 并且是执行外部程序的, 虽然也是有多个进程, 但是它并不是python的
+#       多进程库, 因为它创建的子进程不是执行函数的, 而是执行外部程序, python的多进程库是multiprocessing
+#       os.getpid()可以获取当前进程的pid
+
+
+##06 multiprocessing多进程模块
+#   描述: 多进程模块的用法和threading模块非常相似的
+#   例子:
+        def main(): 
+            print("Parent process pid %s" % os.getpid()) 
+            pros = [] 
+            for i in range(10): 
+                p = mg.Process(target=run_proc, args=(i,)) 
+                pros.append(p) 
+                p.start() 
+            [p.join() for p in pros] 
+            print("all end") 
+
+        def run_proc(x): 
+            print("I am processor %d, my pid is %s" % (x, os.getpid()))
+
+        def main(): 
+            print("Parent process pid %s" % os.getpid()) 
+            p = mg.Pool(10) 
+            for i in range(10): 
+                #p = mg.Process(target=run_proc, args=(i,)) 
+                #pros.append(p) 
+                #p.start() 
+                p.apply_async(run_proc, args=(i,)) 
+            # [p.join() for p in pros] 
+            print("all started") 
+            p.close() 
+            p.join() 
+            print("all end") 
+
+        def run_proc(x): 
+            print("run task %d (%s)" % (x, os.getpid())) 
+            start = time.time() 
+            time.sleep(np.random.rand() * 2) 
+            end = time.time() 
+            print("task %d, run %.3f seconds" % (x, end - start))
+            #time.sleep(np.random.rand()* 2) 
+#   ps: 这里需要注意的是, Pool默认一次创建cpu逻辑核数个进程, 我的是8个, 所以如果不指定Pool()的第一个参数的话
+#       则第9个进程需要等待有进程结束后才会被执行, 但是如果设置成10的话, 则10个进程是同时被创建的
+
+
+##07 re模块
+#   re模块是python中用于支持正则表达式的模块, 此模块主要有几个常用函数:match, search, findall, finditer, compile, sub
+#   和两个类_sre.SRE_Match, _sre.SRE_Pattern
+#
+#   (1) re.match()
+#       match(
+#           pattern,    # 用于查找的正则表达式模式串, 如果含有'\', 则需要加r变为原始字符串, 如r'a\d'
+#           string,     # 被查找的字符串
+#           flags=0)    # 设置标志, 如re.I 忽略大小写 re.M 多行模式, 标志可以用|连接, 表示同时设置
+#   ps: 从string的头开始匹配(必须从首字符匹配成功), 只匹配一次, 返回匹配到的SER_Match对象, 没有匹配上则返回None
+
+#   (2) SER_Match类, re.match(), re.search()均返回一个SER_Match对象, 几个常用方法如下
+#   mo.group()    # 接受不限个参数(传单独的0和不传是一样的), 参数是组号, 0代表匹配的整个表达式, 1代表第1组, 以此类推,
+#       返回有这些组号对应的字符串构成的元组
+#       ps: group()还可以接受字符串参数作为key寻找匹配的字符串, 这个key是在模式串中用(?P<key>pattern)定义的
+#   mo.groups()   # 一般不传参数, 返回一个元组, 是组号为1-n的小组字符串, 结果等价于group(1, 2, .., n)
+#   mo.span()     #　接受一个小组编号作为参数, 返回这个小组的开始下标和结束下标+1构成的2元组, 可用于切片slice(*group_span)
+#   mo.start(), mo.end()  # 用法和span一样, 只是分别返回开始下标和结束下标
+#   ps: 这里的组的概念是指在pattern中用()括起来的部分算一个组, 按从左至右的顺序从1开始编号, 如模式串'(\d)+ ([a-z]+)'中
+#       包含两个组, 第一个是(\d+), 第二个是([a-z]+), 所以mo.group(1), 返回一个由\d+完成匹配的字符串, mo.group(2)返回[a-z]+匹配的
+#       字符串
+#   例子:
+        aa = "heLLo, 543, --, WORLD, 333"                  
+        cc = re.match("([a-z]+), ([0-9])+", aa, flags=re.I)
+        cc.groups()         #out: ('heLLo', '3') 这里后面的由于()写在+之前, 所以只匹配第一个数字
+        cc.group(0, 1, 2)   #out: ('heLLo, 543', 'heLLo', '3') 注意此处组号最多为2, 因为只有两个(), 大于2会抛出异常
+        cc.group(0, 2)      #out: ('heLLo, 543', 3')
+        cc.group()          #out: 'heLLo, 543' 结果和cc.group(0)是一样的, 都是返回整个匹配的串
+
+#  (3) re.search()
+#   参数和match完全一样, 只是search是在字符串中查找, 返回第一次匹配的串, 而match必须从首位置匹配成功
+
+#  (4) re.sub()
+#       sub(
+#           pattern,    # 正则表达式模式串
+#           repl,       # 替换的字符串, 也可以是一个函数
+#           string,     # 要被查找替换的原始字符串
+#           count=0,    # 模式匹配后替换的最大次数, 0代表替换所有的匹配
+#           flags)      # 设置标志
+#   例子:
+        phone = "2004-959-559 # 这是一个国外电话号码"
+        num = re.sub(r'#.*$', "", phone)    #out: num='2004-959-559'
+        num = re.sub(r'\D', "", phone)      #out: num='2004959559'  \D是匹配非数字
+        num = re.sub(r'\D', "G", phone)     #out: num='2004G959G559GGGGGGGGGGGGG'
+
+        s = 'A23G4HFD567'
+        def double(matched):
+            value = int(matched.group('value'))
+            return str(value * 2)
+        re.sub('(?P<value>\d+)', double, s) #out: A46G8HFD1134
+        # 上面的代码和下面的代码结果是一样的
+        def de(x):
+            return str(int(x.group()) * 2)
+        re.sub(r'(\d+)', de, s)             #out: 'A46G8HFD1134'
+
+
+        def de(x):
+            return str(x.group(1, 2)* 2)
+        re.sub(r'(\d+).(\d+)', de, s)       #out: "A('23', '4', '23', '4')HFD('5', '7', '5', '7')"
+#   (5) re.findall(), re.finditer()
+#   这两个函数参数和match()一样, 但是他们返回所有匹配项, 而它们两的区别是, findall()返回列表(可能是二维列表)
+#   finditer()返回一个迭代器(每一个元素是一个SER_Match对象)
+
+#  (6) re.compile()
+#       compile(
+#           pattern,    # 正则表达式模式串, 用于构造正则表达式对象SER_Pattern
+#           flags=0)    # 设置标志
+#   返回一个SER_Pattern对象, 这个对象拥有的函数和re的上述函数是一样的, 只是参数不一样
+#   pa.match(string=None, pos=0, endpos9223372036854775807, *, pattern=None)
+#   所有函数的前三个参数都是一样的, pos, endpos用于指定匹配的起止位置
+
+## 08 json模块
+#   json模块用于处理json相关的数据, 下面介绍四个主要的函数:load(), loads(), dump(), dumps()
+#       load(), loads()分别用于从文件和字符串读取json格式数据, 返回数据对应的python对象
+#       dump(), dumps()分别用于将python对象存储为json格式文件和json格式字符串
+#       
+#
+#   例子:
+        ss = {10: [{1: 'aa', 2: 'bb'}, {3: 'cc', 4: 'dd'}], 20: [1, 2, 3], '你好': ['hello', 'world'], 30: 1000.2}
+        gg = json.dumps(ss, ensure_ascii=False, indent=2)   # ensure_ascii=False则允许显示非ascii码, 默认为True(非ascii码用\转义)
+            # indent是非负整数, 用于指定是否有缩进, 需要注意的是, indent=0和不指定indent是有区别的, 前者会有换行产生, 后者则没有
+        fw = open("gg.json", "w")
+        json.dump(ss, fw, ensure_ascii=False, indent=2)     # 将ss写入json文件
+        fw.flush()
+        # ps: 无论是将python对象写入文件还是字符串, 最终的json数据中, key都会变成字符串格式, 虽然ss中的key是整数, 这就导致读取出
+        #   来的json格式的python对象,和原始的ss不相等了, 这是因为json是java script的子集, 而java script中的key只能是字符串的
+        kk = json.loads(gg)
+        fr = open("gg.json", "r")
+        hh = json.load(fr)
+        kk == hh    # True
+        kk == ss    # False, 因为kk中的key 10是"10", 而ss中的key 10就是整数10
+
+

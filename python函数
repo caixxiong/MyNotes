@@ -1,0 +1,70 @@
+#01 os.walk()
+#   (1) os.walk('path'),其返回值是一个生成器,生成器的每个元素是一个三元组,其形式如下:
+#       ('cur_dir', ['child_dir1', 'child_dir2',..],['child_file1', 'child_file2',..])
+#       第一个元组的cur_dir是path,第二元组的cur_dir是第一个元组中第二个元素(子目录名)的第
+#       一个子目录名,然后依次进行深度优先,即第三个元组不是第一个元组子目录的第二个,而是第
+#       二个元组子目录的第一个,需要注意的是,cur_dir字符串是以path为根目录的相对目录,而子目
+#       录和子文件列表中的名字是没有以cur_dir为前缀的,它就是一个纯粹的目录或文件名
+#
+#   (2) 例子:
+#   假设当前目录下有一个目录叫aa,然后aa的目录结构如下:其中有f的是文件,其余是目录
+    aa
+    ├── bb
+    │   ├── cc
+    │   │   ├── dd
+    │   │   ├── dd1
+    │   │   └── dd2
+    │   ├── cc1
+    │   ├── cc2
+    │   ├── ccf1
+    │   ├── ccf2
+    │   └── ccf3
+    ├── bb1
+    ├── bb2
+    ├── bbf1
+    ├── bbf2
+    └── bbf3
+#   则list(os.walk('aa'))的输出结果如下:
+[('aa', ['bb', 'bb2', 'bb1'], ['bbf1', 'bbf2', 'bbf3']),
+ ('aa/bb', ['cc1', 'cc2', 'cc'], ['ccf1', 'ccf2', 'ccf3']),
+ ('aa/bb/cc1', [], []),
+ ('aa/bb/cc2', [], []),
+ ('aa/bb/cc', ['dd', 'dd2', 'dd1'], []),
+ ('aa/bb/cc/dd', [], []),
+ ('aa/bb/cc/dd2', [], []),
+ ('aa/bb/cc/dd1', [], []),
+ ('aa/bb2', [], []),
+ ('aa/bb1', [], [])]
+# 所以要获得aa目录下所有子目录的长目录名,则可以用下面的代码:
+# sub_dir = [x[0] for x in os.walk('aa')]
+['aa',
+ 'aa/bb',
+ 'aa/bb/cc1',
+ 'aa/bb/cc2',
+ 'aa/bb/cc',
+ 'aa/bb/cc/dd',
+ 'aa/bb/cc/dd2',
+ 'aa/bb/cc/dd1',
+ 'aa/bb2',
+ 'aa/bb1']
+# 然后除去这个列表的第一个元素'aa'本身即可,并且需要注意这个顺序
+# 是深度优先的
+# ps: 如果参数path用的是绝对路径, 则输出中每个三元组的第一个元素(当前子目录)也是
+#   绝对路径, 但是后面的子目录和文件则是相对路径
+# ps: path是必选参数
+
+# 02 glob.glob() 和 glob.iglob()
+# glob模块中有两个主要的函数: glob(), iglob()
+# 这两个函数的功能是一样的, 只是glob()返回的是list, iglob()返回的是生成器
+glob.glob(pathname, *, recursive=False) # pathname是一个模式串, 模式串支持的通配符只有: *,?,[], * >=0个任意字符, ? 1个任意字符, [a-z 0-1]1个[]内的字符
+# 例子:
+glob.glob("./ab*py") # ['./abpy']
+glob.glob("./a*py")  # ['./aapy', './acpy', './abpy'] # 此处的*是>=0个任意字符,而不是正则表达式中的重复前一个字符>=0次(py, apy, aapy, ...)
+glob.glob("./a?py")  # ['./aapy', './acpy', './abpy']
+glob.glob("./a??py") # []   # ?只匹配一个字符, 所以此处只能匹配a和py之间恰好有两个任意字符的串
+glob.glob("./a[a-d]py")       # ['./aapy', './acpy', './abpy']
+glob.glob("./a[a-d][a-d]py")  # [], 说明[]也是匹配恰好一个字符, 不能是多个或0个
+# ps: recursive参数, 字面意思是是否递归匹配, 但是实际上好像不起作用
+# ps: 正则表达式中的*是重复前面的字符>=0次, ?是重复前面的字符0或1次, ? | 需要转义,如果grep用-E则? | 不需要加\
+# ps: pathname可以是绝对或者相对路径
+
