@@ -1,0 +1,6 @@
+git init      # 初始化本地仓库, 会创建.git文件夹, .git是当前目录是否是仓库的标志
+git add file  # 将file添加到git中, file的状态从untracked变为staged
+git status    # 查看当前仓库的状态, 比如: 哪些文件是untracked(没有被追踪的, 即没有
+    # 添加到git仓库的), 哪些是staged(可以被commited的), 哪些是之前add但是有修改过
+git diff      # 查看文件修改的具体地方
+git commit -m 'the description'  # 提交修改到仓库, 必须是有-m选项
