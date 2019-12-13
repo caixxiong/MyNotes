@@ -6,6 +6,13 @@ git diff      # 查看文件修改的具体地方, git diff HEAD -- file 可以�
     # 版本的file的区别
 git commit -m 'the description'  # 提交修改到仓库, 必须是有-m选项
 git checkout -- file  # 如果修改了file或直接用系统命令删除了file, 则可以由此恢复
+    # git checkout name    # 是进入名字为name的branch
+    # git checkout -- file # 是撤销对file的修改, 具体来说此命令的作用是让file退回
+    #   到最近一次git commit或git add的状态, 即如果file修改后没有过add, 则是回到
+    #   该本版的最初状态(最近的commit), 如果add之后修改的, 则是回到add后没修改的
+    #   状态, 另外如果是用git checkout HEAD file, 则是直接回到最初的commit版本
+    # git reset HEAD file  # 可以把file从暂存区取出重新放回到工作区, 此时可以继续
+    #   使用git checkout -- file 使file回到最初的commit状态
 git log --pretty=oneline  # 查看commit的历史记录, HEAD是当前版本, 往下是时间越靠前
     # 的版本, 前面的16进制串是commit_id(版本号), 是一个哈希值
 git reflog    # 可以查看命令历史, 确定每次提交的版本号, 从而用git reset恢复指定版
