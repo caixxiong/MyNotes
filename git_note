@@ -13,6 +13,13 @@ git checkout -- file  # 如果修改了file或直接用系统命令删除了file
     #   状态, 另外如果是用git checkout HEAD file, 则是直接回到最初的commit版本
     # git reset HEAD file  # 可以把file从暂存区取出重新放回到工作区, 此时可以继续
     #   使用git checkout -- file 使file回到最初的commit状态
+git rm file   # 删除文件, 此命令执行后删除操作是staged状态的, 如果是系统rm命令直接
+    #   删除, 则这个操作是unstaged的(不会被commit命令提交), 所以此时如果要删除文件
+    #   则在使用git rm file将删除操作变为staged, 然后在commit, 如果不想删除, 则用
+    #   git checkout -- file将删除操作撤销, 但是需注意, 此撤销其实是恢复git中的最
+    #   新版本到工作区, 如果在git的最新版本后期修改内容(没有add到暂存区), 则这些修
+    #   改是没有保留的
+
 git log --pretty=oneline  # 查看commit的历史记录, HEAD是当前版本, 往下是时间越靠前
     # 的版本, 前面的16进制串是commit_id(版本号), 是一个哈希值
 git reflog    # 可以查看命令历史, 确定每次提交的版本号, 从而用git reset恢复指定版
