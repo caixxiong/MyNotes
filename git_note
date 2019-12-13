@@ -17,8 +17,12 @@ git reset --hard commit_id  # 用于回到指定版本, commit_id可以是hash�
     #   版本就会成为新的HEAD, 而0~n-1这些则看不到了, 但是可以使用git reflog查看所
     #   有的commit_id序列, 从而找到之前的HEAD恢复, 此时log列表中可以看到所有的
     #   commit_id的, 0~n-1 n n+1等
+    # ps: 使用这条命令时一定要特别注意, 如果有add后没有提交的文件, 必须要提交之后
+    #   才reset, 否则即使再次恢复到改版本, 这些staged状态的文件都会丢失, 这一点很
+    #   可怕的, 整个文件都没了
 
 # git中文件的状态: 没有使用add的文件都是untracked状态, 表示不会被git追踪和管理, 如
     # 果使用了add, 则会被git追踪了, 此时状态分为两种:staged和unstaged, 前者是指可
     # 以直接commit的, 一般是刚用add之后的文件, 后者则是之前add了但是后面又修改了,
     # 此时需要将修改后的文件再次add, 才会变成staged状态
+
