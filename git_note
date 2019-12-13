@@ -7,3 +7,9 @@ git commit -m 'the description'  # 提交修改到仓库, 必须是有-m选项
 git checkout -- file  # 如果修改了file或直接用系统命令删除了file, 则可以由此恢复
 git log --pretty=oneline  # 查看commit的历史记录, HEAD是当前版本, 往下是时间越靠前
     # 的版本, 前面的16进制串是commit_id(版本号), 是一个哈希值
+git reflog    # 可以查看命令历史, 确定每次提交的版本号, 从而用git reset恢复指定版
+    # 本, 准确来说, git log查看提交历史便于回退到哪个版本, git reflog查看命令历史
+    # 便于确定回到未来哪个版本
+git reset --hard commit_id  # 用于回到指定版本, commit_id可以是hash的前几位, 只要
+    # 能唯一确定版本号即可, HEAD是当前版本, HEAD^ HEAD^^分别是上一个和上上个版本
+    # 以此类推, 也可以用HEAD~5表示最新的第5个版本
