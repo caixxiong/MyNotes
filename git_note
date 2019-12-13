@@ -28,6 +28,7 @@ git reflog    # 可以查看命令历史, 确定每次提交的版本号, 从而
 git reset --hard commit_id  # 用于回到指定版本, commit_id可以是hash的前几位, 只要
     # 能唯一确定版本号即可, HEAD是当前版本, HEAD^ HEAD^^分别是上一个和上上个版本
     # 以此类推, 也可以用HEAD~5表示最新的第5个版本
+    # ps: git reset回到某个版本后, 如果没有加--hard选项, 则工作区的文件还需手动加
     # ps: git其实是用HEAD指针指向当前版本的, 如果直接退回到倒数第n个版本, 则这个
     #   版本就会成为新的HEAD, 而0~n-1这些则看不到了, 但是可以使用git reflog查看所
     #   有的commit_id序列, 从而找到之前的HEAD恢复, 此时log列表中可以看到所有的
