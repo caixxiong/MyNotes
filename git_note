@@ -70,6 +70,11 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     #     情况, 这个时候如果每天都提交代码, 由于代码的不完整性, 可能导致别人使用出
     #     错, 但是如果不提交, 又可能会有丢失代码的风险, 所以最好的解决办法就是创建
     #     每个人自己的分支, 最后再合并
+    git branch dev   # 创建分支dev
+    git branch       # 查看所有分支, *则是当前分支
+    git checkout dev # 进入dev分支, 若使用-b选项则是创建并切换
+
+
 
 # ps: git diff显示的信息含义:
     # 第一行: diff --git a/file_name b/file_name, 是git实际执行的命令, a是原文件
