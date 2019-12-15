@@ -65,16 +65,21 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     #         状态, 从comit_id可以恢复出一个版本的(所有)文件
     # ps: git管理的是文件的修改(状态), 而不是文件本身,只是在恢复的时候可以根据保存
     #     的这些修改状态和最初的文件还原最终的文件
+
 # git 分支:
     # 用户创建的非master分支, 别的用户是看不到的, 方便用于一个功能要多天才能完成的
     #     情况, 这个时候如果每天都提交代码, 由于代码的不完整性, 可能导致别人使用出
     #     错, 但是如果不提交, 又可能会有丢失代码的风险, 所以最好的解决办法就是创建
     #     每个人自己的分支, 最后再合并
-    git branch dev   # 创建分支dev
     git branch       # 查看所有分支, *则是当前分支
+    git branch dev   # 创建分支dev
     git checkout dev # 进入dev分支, 若使用-b选项则是创建并切换
-
-
+    git merge dev    # 将dev分支合并到当前分支上, 如果没有合并, 则其他分支的提交
+        # 在当前分支是看不到的, 在master上创建新分支, 新分支可以看到master的所有
+        # 文件, 但是在新分支上的文件在切换到之前分支是看不到的(除非merge)
+    git branch -d dev # 删除dev分支, 一般是merge之后就可以删除分支了
+    ps: git switch dev, git switch -c dev  # 是新版本git切换, 创建+切换分支的命令
+    ps: 因为分支操作的速度很快, Git官方是鼓励大量使用分支的
 
 # ps: git diff显示的信息含义:
     # 第一行: diff --git a/file_name b/file_name, 是git实际执行的命令, a是原文件
