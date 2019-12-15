@@ -36,6 +36,10 @@ git reset --hard commit_id  # 用于回到指定版本, commit_id可以是hash�
     # ps: 使用这条命令时一定要特别注意, 如果有add后没有提交的文件, 必须要提交之后
     #   才reset, 否则即使再次恢复到改版本, 这些staged状态的文件都会丢失, 这一点很
     #   可怕的, 整个文件都没了
+git remote add origin git@github.com:caixxiong/MyNotes.git  # 关联远程库, 注意必须
+    # 在远程先建立一个仓库才能将本地库关联到远程, origin是远程库的名字, 是默认写法
+git push -u origin master  # 将本地库的所有内容推送到远程库中, 第一次要使用-u选项, 
+    # 将远程和本地的master分支关联起来, 后续的pull和push则不需要-u了
 
 # git中文件的状态: 没有使用add的文件都是untracked状态, 表示不会被git追踪和管理, 如
     # 果使用了add, 则会被git追踪了, 此时状态分为两种:staged和unstaged, 前者是指可
