@@ -40,6 +40,10 @@ git remote add origin git@github.com:caixxiong/MyNotes.git  # 关联远程库, �
     # 在远程先建立一个仓库才能将本地库关联到远程, origin是远程库的名字, 是默认写法
     # origin在之后的push和pull中会经常用的, 因为它是远程库的名字
     # 一般写法: git remote add origin git@server-name:path/repo-name.git
+    # 如果使用码云作为远程, 则是git remote add origin git@gitee.com:path/rep.git
+    # 如果此举失败, 则git remote -v查看, 发现本地库已经关联了一个叫origin的远程库
+    # 此时可以用git remote rm origin删除远程库, 然后再重新remote add, 此处我觉得
+    # 应该也可以用另外一个名字,如origin_2 来将本地仓库关联到新的远程
 git push -u origin master  # 将本地库的所有内容推送到远程库中, 第一次要使用-u选项, 
     # 将远程和本地的master分支关联起来, 后续的pull和push则不需要-u了
     ps: 有时候比较慢, 甚至不走字, 过一会而重试就好了
@@ -119,6 +123,15 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
 
 # git多人合作
     git remote -v  # 显示远程库信息
+    git clone url  # 此命令不仅克隆仓库, 且创建本地master分支且会和远程master关联
+    git checkout -b dev origin/dev  # 创建dev本地分支且关联远程的dev分支
+    git push origin branch_name  # 推送分支到远程, 如果失败, 则可能要先pull下来
+    #   然后在本地合并, 可能出现合并冲突, 此时就要手动解决冲突, 如果git pull也失
+    #   败, 则可能是本地dev没和远程origin/dev关联, git branch --set-upstream-to
+    #   =origin/dev dev, git pull默认是pull和当前分支同名的远程分支
+    ps: 新创建的本地分支如果没有推送到远程, 则对其他人是不可见的
+
+
 
 # ps: git diff显示的信息含义:
     # 第一行: diff --git a/file_name b/file_name, 是git实际执行的命令, a是原文件
