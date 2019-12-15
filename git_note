@@ -86,6 +86,7 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     git branch -r        # -r查看远程分支, -a查看所有分支(远程和本地)
     git branch -r -d origin/dev  && git push origin :dev  # 删除远程分支dev
     git push -d origin dev  # 删除远程分支更快的方法, 使用-d选项
+    git remote  # 显示远程库信息, -v显示更详细信息
     ps: 如果有change没有commit, 则checkout到其他分支会失败, 必须commit后才可以切
     #   换到其他分支, 这就出现一个问题, 如果当前工作还没有干完, 不能commit, 但是
     #   之前发布的代码有bug了, 需要创建临时分支进行修改, 此时又不能checkout到其
@@ -103,6 +104,7 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     #   使用 git log --graph --pretty=oneline --abbrev-commit 查看分支合并图,另外
     #   使用git merge --no-ff选项是需要使用-m "commit info", 因为此时会对新分支进
     #   行一次提交, 然后再合并, 如果不用--no-ff, 则是直接合并, 不对新分支进行提交
+    #   ps: 手动修改文件时, 要把其中的<<<<<和===和>>>等标记删除
     ps: 分支管理原则, 一般来说, master分支应该是非常稳定的, 用于发布新版本, 平时不
     #    能在上面干活, 需要给干活创建一个新分支叫做dev, 小伙伴们都会有自己的干活分
     #    支, 各自写好的代码在dev分支上合并和管理, 这样也方便修复bug, 因为出了bug
@@ -114,6 +116,9 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     ps: 出现bug时, 是在master分支上创建临时bug分支, 开发新功能时, 在dev分支上创建
     #   feature临时分支, 写完代码后合并到master上并删除临时分支, 其中可能需要用
     #   git stash保存当前工作区, 并且对于bug分支来说, 还需将bug提交在dev上重复一次
+
+# git多人合作
+    git remote -v  # 显示远程库信息
 
 # ps: git diff显示的信息含义:
     # 第一行: diff --git a/file_name b/file_name, 是git实际执行的命令, a是原文件
