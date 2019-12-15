@@ -42,6 +42,7 @@ git remote add origin git@github.com:caixxiong/MyNotes.git  # 关联远程库, �
     # 一般写法: git remote add origin git@server-name:path/repo-name.git
 git push -u origin master  # 将本地库的所有内容推送到远程库中, 第一次要使用-u选项, 
     # 将远程和本地的master分支关联起来, 后续的pull和push则不需要-u了
+    ps: 有时候比较慢, 甚至不走字, 过一会而重试就好了
 git pull origin  # 将远程仓库拉取下来, 对于用git clone创建的仓库也可直接使用该命令
     # 即使没有手动用git remote add origin关联之
 git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/rep_name.git
