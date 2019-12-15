@@ -43,6 +43,8 @@ git remote add origin git@github.com:caixxiong/MyNotes.git  # 关联远程库, �
 git push -u origin master  # 将本地库的所有内容推送到远程库中, 第一次要使用-u选项, 
     # 将远程和本地的master分支关联起来, 后续的pull和push则不需要-u了
     ps: 有时候比较慢, 甚至不走字, 过一会而重试就好了
+    ps: 有时候push失败, 说远程仓库有本地没有的内容, 此时先git pull origin b_name
+    #   然后再push即可
 git pull origin  # 将远程仓库拉取下来, 对于用git clone创建的仓库也可直接使用该命令
     # 即使没有手动用git remote add origin关联之
 git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/rep_name.git
@@ -82,6 +84,9 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     git push origin dev  # 将dev推送到远程分支
     git branch -r        # -r查看远程分支, -a查看所有分支(远程和本地)
     git branch -r -d origin/dev  && git push origin :dev  # 删除远程分支dev
+    git push -d origin dev  # 删除远程分支更快的方法, 使用-d选项
+    ps: 如果有change没有commit, 则checkout到其他分支会失败, 必须commit后才可以切
+    #   换到其他分支
     ps: git switch dev, git switch -c dev  # 是新版本git切换, 创建+切换分支的命令
     ps: 因为分支操作的速度很快, Git官方是鼓励大量使用分支的
 
