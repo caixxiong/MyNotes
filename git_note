@@ -87,10 +87,33 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     git branch -r -d origin/dev  && git push origin :dev  # 删除远程分支dev
     git push -d origin dev  # 删除远程分支更快的方法, 使用-d选项
     ps: 如果有change没有commit, 则checkout到其他分支会失败, 必须commit后才可以切
-    #   换到其他分支
+    #   换到其他分支, 这就出现一个问题, 如果当前工作还没有干完, 不能commit, 但是
+    #   之前发布的代码有bug了, 需要创建临时分支进行修改, 此时又不能checkout到其
+    #   他分支, 所以git提供了一个功能: git stash, 用于保存当前工作区, 可以切换到
+    #   其他分支, 使用新的工作区, 等修改完后, 再继续切换到当前分支并恢复当前工作
+    #   区, 恢复是用git stash list查看所有的stash, 然后git stash pop恢复工作区并
+    #   把stash删除, git stash apply 则是恢复工作区但是不删除stash, 如果是有多个
+    #   stash, 则git stash apply stash@{k}即可, k是stash编号, 另外需要注意的是, 
+    #   在master上修复好bug后, 这个bug在dev分支上仍然是存在的, 此时可以用git提供
+    #   的git cherry-pick bug_fixed_commit_id, 就可以把修复bug的提交在dev分支上
+    #   重复一遍, 此时可能会有问题, 就是如果修复bug的那部分代码在dev上有过改动,则
+    #   可能git cherry-pick命令可能会出现无法合并后的错误
     ps: 因为分支操作的速度很快, Git官方是鼓励大量使用分支的
-    ps: 如果自动merge失败, 则需要手动编辑文件为我们希望的内容, 然后commit和合并
-    #   使用 git log --graph --pretty=oneline --abbrev-commit 查看分支合并图
+    ps: 如果自动merge失败, 则需要手动编辑文件为我们希望的内容, 然后commit和merge
+    #   使用 git log --graph --pretty=oneline --abbrev-commit 查看分支合并图,另外
+    #   使用git merge --no-ff选项是需要使用-m "commit info", 因为此时会对新分支进
+    #   行一次提交, 然后再合并, 如果不用--no-ff, 则是直接合并, 不对新分支进行提交
+    ps: 分支管理原则, 一般来说, master分支应该是非常稳定的, 用于发布新版本, 平时不
+    #    能在上面干活, 需要给干活创建一个新分支叫做dev, 小伙伴们都会有自己的干活分
+    #    支, 各自写好的代码在dev分支上合并和管理, 这样也方便修复bug, 因为出了bug
+    #    后, 一般是就地创建修改bug的分支, 这个分支必须是在发布版本上创键, 因为git
+    #    在哪里创建分支, 则分支中的内容就是当前工作目录下的, 所以基于发布版上创建
+    #    临时分支, 就是在出现bug的原始代码上改, 如果没有dev分支, 大家的所有工作都
+    #    基于master, 则出现bug时, master可能已经有了很多改动, 当前的master已经不
+    #    是之前的master了, 此时要定位到之前出bug的版本就比较繁琐了
+    ps: 出现bug时, 是在master分支上创建临时bug分支, 开发新功能时, 在dev分支上创建
+    #   feature临时分支, 写完代码后合并到master上并删除临时分支, 其中可能需要用
+    #   git stash保存当前工作区, 并且对于bug分支来说, 还需将bug提交在dev上重复一次
 
 # ps: git diff显示的信息含义:
     # 第一行: diff --git a/file_name b/file_name, 是git实际执行的命令, a是原文件
