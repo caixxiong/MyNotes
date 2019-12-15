@@ -77,7 +77,10 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     git merge dev    # 将dev分支合并到当前分支上, 如果没有合并, 则其他分支的提交
         # 在当前分支是看不到的, 在master上创建新分支, 新分支可以看到master的所有
         # 文件, 但是在新分支上的文件在切换到之前分支是看不到的(除非merge)
-    git branch -d dev # 删除dev分支, 一般是merge之后就可以删除分支了
+    git branch -d dev    # 删除dev分支, 一般是merge之后就可以删除分支了
+    git push origin dev  # 将dev推送到远程分支
+    git branch -r        # -r查看远程分支, -a查看所有分支(远程和本地)
+    git branch -r -d origin/dev  && git push origin :dev  # 删除远程分支dev
     ps: git switch dev, git switch -c dev  # 是新版本git切换, 创建+切换分支的命令
     ps: 因为分支操作的速度很快, Git官方是鼓励大量使用分支的
 
