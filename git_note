@@ -38,6 +38,7 @@ git reset --hard commit_id  # 用于回到指定版本, commit_id可以是hash�
     #   可怕的, 整个文件都没了
 git remote add origin git@github.com:caixxiong/MyNotes.git  # 关联远程库, 注意必须
     # 在远程先建立一个仓库才能将本地库关联到远程, origin是远程库的名字, 是默认写法
+    # 一般写法: git remote add origin git@server-name:path/repo-name.git
 git push -u origin master  # 将本地库的所有内容推送到远程库中, 第一次要使用-u选项, 
     # 将远程和本地的master分支关联起来, 后续的pull和push则不需要-u了
 
