@@ -60,6 +60,11 @@ git clone url  # 克隆远程库到本地, url可以是git@github.com:caixxiong/
     # git remote add origin, 先有本地库后有远程库的关联方式
     # git clone url, 从0开发, 先创建好远程库, 然后克隆到本地, 不需git remote add
 
+# .gitignore文件, 在当前目录下创建该文件, 把不需要track的文件名放进去, 然后把
+#   .gitignore本身commit到版本库中, git status就不会显示当前目录下那些乱七八糟的文
+#    件了, 使用git add -f file_name, 可以把被.gitignore忽略的文件强制添加
+#    git check-ignore -v file_name可以查看gitignore规则是否有误
+
 # git中文件的状态: 没有使用add的文件都是untracked状态, 表示不会被git追踪和管理, 如
     # 果使用了add, 则会被git追踪了, 此时状态分为两种:staged和unstaged, 前者是指可
     # 以直接commit的, 一般是刚用add之后的文件, 后者则是之前add了但是后面又修改了,
